@@ -5,7 +5,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import Sidebar from './components/Layout/Sidebar';
 import TopNav from './components/Layout/TopNav';
 
-// Import Pages (Ensure these files exist in your pages folder)
+// Import Pages
 import Overview from './pages/Overview';
 import Interviews from './pages/Interviews';
 import PlannedDates from './pages/PlannedDates';
@@ -16,34 +16,35 @@ const AppContent = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
   
-  const isLoginPage = location.pathname === '/login';
+  // FIXED: Now both "/" and "/login" are treated as Login pages without Sidebar/TopNav
+  const isLoginPage = location.pathname === '/' || location.pathname === '/login';
 
   // Helper to get title based on path
   const getTitle = () => {
     const path = location.pathname.split('/')[1];
-    return path || 'Dashboard';
+    if (!path || path === 'login') return 'Welcome';
+    return path;
   };
 
+  // 1. LOGIN LAYOUT (No Sidebar, No TopNav)
   if (isLoginPage) {
     return (
       <div className="min-h-screen bg-white">
         <Routes>
+          <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
-          <Route path="*" element={<Navigate to="/login" />} />
+          {/* If they try to go to a non-existent page while logged out, send to login */}
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
     );
   }
 
+  // 2. DASHBOARD LAYOUT (With Sidebar and TopNav)
   return (
     <div className="min-h-screen bg-[#FAFAFB] flex">
-      {/* Sidebar logic handles its own mobile visibility via props */}
       <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
       
-      {/* 
-          Main Content Area 
-          lg:ml-64 means it only adds margin for sidebar on large screens 
-      */}
       <div className="flex-1 flex flex-col min-h-screen lg:ml-64 transition-all duration-300">
         <TopNav 
           title={getTitle()} 
@@ -52,12 +53,14 @@ const AppContent = () => {
 
         <main className="p-6 md:p-10 flex-1">
           <Routes>
-            <Route path="/" element={<Navigate to="/overview" />} />
+            {/* The dashboard routes only start from /overview, /interviews etc. */}
             <Route path="/overview" element={<Overview />} />
             <Route path="/interviews" element={<Interviews />} />
             <Route path="/dates" element={<PlannedDates />} />
             <Route path="/restaurants" element={<Restaurants />} />
-            <Route path="/login" element={<Login />} />
+            
+            {/* If they are in the dashboard area and hit an unknown route, go to overview */}
+            <Route path="*" element={<Navigate to="/overview" />} />
           </Routes>
         </main>
       </div>

@@ -18,14 +18,14 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-[#FAFAFB] p-4">
+    <div className="min-h-screen w-full flex items-center justify-center bg-purple-100 p-4">
       {/* Decorative Background Elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-purple-50 rounded-full blur-3xl opacity-50"></div>
         <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-orange-50 rounded-full blur-3xl opacity-50"></div>
       </div>
 
-      <div className="bg-white w-full max-w-md rounded-[3rem] shadow-2xl shadow-purple-100/50 p-10 md:p-12 z-10 border border-gray-50">
+      <div className="bg-purple-300 w-full max-w-md rounded-[3rem] shadow-2xl shadow-purple-100/50 p-10 md:p-12 z-10 border border-gray-50">
         {/* Logo & Header */}
         <div className="flex flex-col items-center mb-10">
           <div className="w-16 h-16 bg-[#632281] rounded-3xl flex items-center justify-center text-white font-black text-3xl shadow-lg shadow-orange-200 mb-4">
@@ -88,7 +88,7 @@ const Login = () => {
 
         {/* Footer */}
         <div className="mt-10 text-center">
-          <p className="text-gray-400 text-sm font-medium">
+          <p className="text-black-400 text-sm font-medium">
             Protected by secure encryption. <br />
             &copy; 2024 DateApp Admin.
           </p>

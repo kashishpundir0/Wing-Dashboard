@@ -21,7 +21,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to log out?")) {
-      navigate('/login');
+      navigate('/');
     }
   };
 
@@ -36,14 +36,14 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       )}
 
       <aside className={`
-        fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-100 flex flex-col z-50 shadow-sm
+        fixed left-0 top-0 h-screen w-64 bg-purple-100 border-r border-gray-100 flex flex-col z-50 shadow-sm
         transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full'} 
         lg:translate-x-0
       `}>
         
         {/* Logo Section */}
-        <div className="p-8 flex items-center justify-between bg-white">
+        <div className="p-8 flex items-center justify-between bg-purple-200 border-b border-gray-200">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-[#632281] rounded-full flex items-center justify-center text-white font-black text-xl shadow-lg">W</div>
             <span className="text-xl font-bold text-[#632281]">Admin</span>
@@ -60,11 +60,11 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             <NavLink
               key={item.id}
               to={item.path}
-              onClick={() => setIsOpen(false)} // Close sidebar on click on mobile
+              onClick={() => setIsOpen(false)} 
               className={({ isActive }) => `
-                w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold transition-all
+                w-full flex items-center rounded-xl gap-4 px-4 py-3.5 font-bold transition-all
                 ${isActive 
-                  ? 'bg-purple-50 text-[#632281]' 
+                  ? 'bg-purple-100 text-[#632281]' 
                   : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'}
               `}
             >
@@ -75,7 +75,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         </nav>
 
         {/* Logout Section */}
-        <div className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-50 p-4">
+        <div className="absolute bottom-0 left-0 w-full bg-purple-100 border-t border-gray-50 p-4">
           <button 
             onClick={handleLogout}
             className="w-full flex items-center gap-4 px-4 py-3 text-red-500 font-bold hover:bg-red-50 rounded-2xl transition-all group"
