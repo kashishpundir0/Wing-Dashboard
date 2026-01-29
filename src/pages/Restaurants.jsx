@@ -1,271 +1,295 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
-  Utensils, 
-  MapPin, 
-  Pizza, 
-  Banknote, 
-  Mail, 
-  Save, 
-  RotateCcw,
-  PlusCircle,
-  X,
-  Plus,
-  Image as ImageIcon, // Renamed to avoid conflict
-  Upload
-} from 'lucide-react';
+  Utensils, MapPin, Pizza, Banknote, X, Plus, Upload, Globe, Hash, Link, Coffee, Camera, Trash2, Edit3, Mail, Building2 
+} from 'lucide-react'; // Added Building2 icon
 import { Input } from '../components/Shared/Input';
 import { Button } from '../components/Shared/Button';
+import { 
+  getAllRestaurants, 
+  addRestaurant, 
+  updateRestaurant, 
+  deleteRestaurant, 
+  IMAGE_BASE_URL 
+} from '../api/restaurantApi';
 
 const Restaurants = () => {
   const fileInputRef = useRef(null);
+  const FOOD_TYPES = ['Italian', 'Japanese', 'French Fusion', 'Indian', 'Continental', 'Cafe Foods', 'Bakery', 'Fast Food'];
+  const VENUE_TYPES = ['Restaurant', 'Cafe'];
 
-  // 1. Initial Dummy Data with placeholder images
-  const initialData = [
-    {
-      id: 1,
-      name: 'The Velvet Fork',
-      location: '123 Luxury Row, Manhattan',
-      foodType: 'French Fusion',
-      budget: '120',
-      email: 'hello@velvetfork.com',
-      image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=500&auto=format&fit=crop&q=60'
-    },
-    {
-      id: 2,
-      name: 'Noodle Zen',
-      location: '45 Sakura St, Brooklyn',
-      foodType: 'Japanese / Ramen',
-      budget: '35',
-      email: 'contact@noodlezen.jp',
-      image: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=500&auto=format&fit=crop&q=60'
-    }
-  ];
-
-  // States
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [restaurantList, setRestaurantList] = useState(initialData);
+  const [restaurantList, setRestaurantList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [editId, setEditId] = useState(null); 
+  const [preview, setPreview] = useState(null); 
+
   const [formData, setFormData] = useState({
-    name: '',
-    location: '',
-    foodType: '',
-    budget: '',
-    email: '',
-    image: null 
+    venueType: 'Restaurant',
+    businessName: '',
+    email: '', 
+    streetAddress: '',
+    cityState: '',
+    pincode: '',
+    googleMapsLink: '',
+    typeOfFood: FOOD_TYPES[0],
+    budgetPerPerson: '',
+    venuePhoto: null 
   });
+
+  const fetchRestaurants = async () => {
+    setLoading(true);
+    try {
+      const result = await getAllRestaurants();
+      setRestaurantList(result.data || []);
+    } catch (error) {
+      console.error("Fetch error", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchRestaurants(); }, []);
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  // Handle Image Upload
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData(prev => ({ ...prev, image: reader.result }));
-      };
-      reader.readAsDataURL(file);
+      setFormData(prev => ({ ...prev, venuePhoto: file }));
+      setPreview(URL.createObjectURL(file));
     }
   };
 
   const handleReset = () => {
-    setFormData({ name: '', location: '', foodType: '', budget: '', email: '', image: null });
+    setFormData({ 
+      venueType: 'Restaurant', businessName: '', email: '', streetAddress: '', cityState: '', 
+      pincode: '', googleMapsLink: '', typeOfFood: FOOD_TYPES[0], 
+      budgetPerPerson: '', venuePhoto: null 
+    });
+    setPreview(null);
+    setEditId(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const handleCreateRestaurant = () => {
-    if (!formData.name || !formData.email) {
-      alert("Please fill in at least the Name and Email");
+  const handleSave = async () => {
+    if (!formData.businessName || !formData.email || !formData.streetAddress) {
+      alert("Please fill in Name, Email, and Address");
       return;
     }
-    setRestaurantList([{ ...formData, id: Date.now() }, ...restaurantList]);
-    handleReset();
-    setIsModalOpen(false);
+
+    const data = new FormData();
+    data.append('venueType', formData.venueType);
+    data.append('businessName', formData.businessName);
+    data.append('email', formData.email); 
+    data.append('streetAddress', formData.streetAddress);
+    data.append('cityState', formData.cityState);
+    data.append('pincode', formData.pincode);
+    data.append('googleMapsLink', formData.googleMapsLink);
+    data.append('typeOfFood', formData.typeOfFood);
+    data.append('budgetPerPerson', formData.budgetPerPerson);
+    
+    if (formData.venuePhoto) {
+      data.append('venuePhoto', formData.venuePhoto);
+    }
+
+    try {
+      if (editId) {
+        await updateRestaurant(editId, data);
+        alert("Venue Updated Successfully!");
+      } else {
+        await addRestaurant(data);
+        alert("Venue Added Successfully!");
+      }
+      fetchRestaurants();
+      setIsModalOpen(false);
+      handleReset();
+    } catch (error) {
+      console.error("Save error:", error.response?.data);
+      alert("Error: " + (error.response?.data?.message || "Failed to save partner"));
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Delete this venue partner?")) {
+      try {
+        await deleteRestaurant(id);
+        fetchRestaurants();
+      } catch (error) {
+        alert("Delete failed");
+      }
+    }
+  };
+
+  const handleEditOpen = (item) => {
+    setEditId(item._id);
+    setFormData({
+      venueType: item.venueType || 'Restaurant',
+      businessName: item.businessName || '',
+      email: item.email || '', 
+      streetAddress: item.streetAddress || '',
+      cityState: item.cityState || '',
+      pincode: item.pincode || '',
+      googleMapsLink: item.googleMapsLink || '',
+      typeOfFood: item.typeOfFood || FOOD_TYPES[0],
+      budgetPerPerson: item.budgetPerPerson || '',
+      venuePhoto: null 
+    });
+    setPreview(item.venuePhoto ? `${IMAGE_BASE_URL}${item.venuePhoto.replace(/\\/g, '/')}` : null);
+    setIsModalOpen(true);
+  };
+
+  const getImageUrl = (path) => {
+    if (!path) return null;
+    return `${IMAGE_BASE_URL}${path.replace(/\\/g, '/')}`;
   };
 
   return (
-    <div className="max-w-8xl mx-auto p-6 space-y-8 animate-in fade-in duration-500">
-      
-      {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-purple-100 p-8 rounded-xl border border-purple-200 shadow-sm">
+    <div className="max-w-8xl mx-auto space-y-8">
+      {/* Header */}
+      <div className="flex flex-col md:items-center md:flex-row justify-between gap-2 bg-purple-100 p-5 rounded-xl border border-purple-200">
         <div>
-          <h2 className="text-3xl font-black text-gray-800">Restaurant Partners</h2>
-          <p className="text-purple-500 font-medium">Manage and onboard venue locations</p>
+          <h2 className="text-xl font-black text-gray-800">Venue Partners</h2>
+          <p className="text-purple-500 font-medium">Manage Restaurants & Cafes locations</p>
         </div>
-        <Button 
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center justify-center gap-2 bg-[#632281] text-white px-8 py-4 rounded-2xl shadow-lg shadow-purple-200 hover:bg-[#4a1961] transition-all"
-        >
+        <Button onClick={() => { handleReset(); setIsModalOpen(true); }} className="flex items-center gap-2 bg-[#632281] text-white px-8 py-4 rounded-2xl shadow-lg">
           <Plus size={20} />
-          <span>Add New Restaurant</span>
+          <span>Add New Venue</span>
         </Button>
       </div>
 
-      {/* Restaurant Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {restaurantList.map((rest) => (
-          <div key={rest.id} className="bg-purple-100 rounded-xl border border-purple-200 shadow-sm hover:shadow-md transition-all group overflow-hidden">
-            {/* Restaurant Image Header */}
-            <div className="h-40 bg-purple-200 relative overflow-hidden">
-              {rest.image ? (
-                <img src={rest.image} alt={rest.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-purple-400">
-                  <Utensils size={40} />
+      {/* Grid */}
+      {loading ? (
+          <div className="text-center py-20 font-bold text-purple-600 animate-pulse">Loading partners...</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {restaurantList.map((rest) => (
+            <div key={rest._id} className="bg-gradient-to-br from-purple-200 to-pink-100 rounded-xl border border-gray-100 shadow-sm overflow-hidden group relative transition-all hover:border-purple-300">
+                <div className="absolute top-4 right-4 z-10 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onClick={() => handleEditOpen(rest)} className="p-2.5 bg-white text-purple-600 rounded-xl shadow-lg hover:bg-purple-50"><Edit3 size={16} /></button>
+                    <button onClick={() => handleDelete(rest._id)} className="p-2.5 bg-white text-red-500 rounded-xl shadow-lg hover:bg-red-50"><Trash2 size={16} /></button>
                 </div>
-              )}
-              <div className="absolute top-4 right-4">
-                <span className="bg-green-500 text-white text-[10px] font-black px-3 py-1 rounded-full tracking-widest uppercase shadow-lg">
-                  Active
-                </span>
-              </div>
+                <div className="h-48 bg-purple-200 relative overflow-hidden">
+                    {rest.venuePhoto ? (
+                        <img src={getImageUrl(rest.venuePhoto)} alt={rest.businessName} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center text-purple-300"><Utensils size={48} /></div>
+                    )}
+                    <div className="absolute top-4 left-4"><span className="bg-[#632281] text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest">{rest.venueType}</span></div>
+                </div>
+                <div className="p-8">
+                    <h4 className="text-2xl font-black text-gray-800 mb-1 truncate">{rest.businessName}</h4>
+                    <p className="text-xs font-bold text-purple-400 mb-4 flex items-center gap-1"><Mail size={12}/> {rest.email}</p>
+                    <div className="space-y-2 mb-6 min-h-[60px]">
+                        <div className="flex items-start gap-3 text-sm text-gray-600 font-medium">
+                            <MapPin size={16} className="text-[#632281] shrink-0 mt-0.5" />
+                            <div className="truncate">
+                                <p className="text-gray-900 font-bold truncate">{rest.streetAddress}</p>
+                                <p className="text-xs truncate">{rest.cityState} - {rest.pincode}</p>
+                            </div>
+                        </div>
+                        {rest.googleMapsLink && (
+                            <a href={rest.googleMapsLink} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-[10px] font-black text-purple-600 uppercase tracking-tighter hover:underline">
+                                <Link size={12}/> View Maps
+                            </a>
+                        )}
+                    </div>
+                    <div className="pt-6 border-t border-purple-50 flex justify-between items-center">
+                        <div>
+                            <span className="text-[10px] uppercase font-black text-purple-400 block mb-1">Cuisine</span>
+                            <div className="flex items-center gap-1.5">
+                                <Pizza size={14} className="text-[#632281]"/>
+                                <span className="text-sm font-black text-gray-700">{rest.typeOfFood}</span>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <span className="text-[10px] uppercase font-black text-purple-400 block mb-1">Budget</span>
+                            <span className="text-lg font-black text-[#632281]">₹{rest.budgetPerPerson}</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            <div className="p-6">
-                <h4 className="text-xl font-bold text-gray-800 mb-1">{rest.name}</h4>
-                <div className="space-y-2 mb-6">
-                    <p className="text-gray-500 text-sm flex items-center gap-2">
-                    <MapPin size={14} className="text-purple-400" /> {rest.location}
-                    </p>
-                    <p className="text-gray-500 text-sm flex items-center gap-2">
-                    <Mail size={14} className="text-purple-400" /> {rest.email}
-                    </p>
-                </div>
-                
-                <div className="pt-4 border-t border-purple-200 flex justify-between items-center">
-                <div>
-                    <span className="text-[10px] uppercase font-bold text-purple-400 block mb-1">Cuisine</span>
-                    <span className="text-sm font-bold text-gray-700">{rest.foodType}</span>
-                </div>
-                <div className="text-right">
-                    <span className="text-[10px] uppercase font-bold text-purple-400 block mb-1">Budget</span>
-                    <span className="text-sm font-black text-[#632281]">${rest.budget}/pp</span>
-                </div>
-                </div>
-            </div>
-          </div>
-        ))}
-      </div>
+            ))}
+        </div>
+      )}
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#632281]/40 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-white w-full max-w-2xl rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            
-            <div className="bg-[#632281] p-8 flex justify-between items-center">
-              <div className="flex items-center gap-4 text-white">
-                <div className="p-3 bg-white/10 rounded-2xl">
-                    <PlusCircle size={24} />
-                </div>
-                <div>
-                    <h3 className="text-xl font-bold">Onboard Restaurant</h3>
-                    <p className="text-purple-200 text-xs">Add a new partner to the platform</p>
-                </div>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="bg-purple-100 w-full max-w-xl rounded-xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
+            <div className="bg-[#632281] p-8 flex justify-between items-center sticky top-0 z-10">
+              <div className="text-white">
+                <h3 className="text-2xl font-black">{editId ? 'Update Venue' : 'Onboard Venue'}</h3>
+                <p className="text-purple-200 text-sm">Required fields marked with *</p>
               </div>
-              <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-white/10 rounded-full text-white transition-colors">
-                <X size={24} />
-              </button>
+              <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-white/10 rounded-full text-white"><X size={24} /></button>
             </div>
 
-            <div className="p-10 space-y-8 bg-purple-50/50">
-              
-              {/* Image Upload Area */}
-              <div className="flex flex-col items-center justify-center border-2 border-dashed border-purple-200 rounded-3xl p-6 bg-white hover:border-[#632281] transition-colors group">
-                {formData.image ? (
-                  <div className="relative w-full h-40">
-                    <img src={formData.image} className="w-full h-full object-cover rounded-2xl" alt="Preview" />
-                    <button 
-                      onClick={() => handleChange('image', null)}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full shadow-lg"
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                ) : (
-                  <div 
-                    onClick={() => fileInputRef.current.click()}
-                    className="flex flex-col items-center cursor-pointer py-4"
-                  >
-                    <div className="p-4 bg-purple-100 rounded-full text-[#632281] mb-2 group-hover:scale-110 transition-transform">
-                      <Upload size={24} />
+            <div className="p-10 space-y-8">
+              <div className="space-y-3">
+                <label className="text-xs font-black text-gray-400 uppercase ml-2 tracking-widest">Venue Photo</label>
+                <div onClick={() => fileInputRef.current.click()} className="relative group h-44 w-full rounded-2xl border-2 border-dashed border-purple-200 bg-purple-50 flex flex-col items-center justify-center cursor-pointer hover:border-[#632281] transition-all overflow-hidden">
+                  {preview ? ( <img src={preview} alt="Preview" className="w-full h-full object-cover" /> ) : (
+                    <div className="flex flex-col items-center text-purple-400 group-hover:text-[#632281]">
+                      <Camera size={32} /><span className="text-xs font-bold mt-2">Upload Photo</span>
                     </div>
-                    <p className="text-sm font-bold text-gray-600">Click to upload restaurant cover photo</p>
-                    <p className="text-xs text-gray-400">PNG, JPG up to 5MB</p>
-                  </div>
-                )}
-                <input 
-                  type="file" 
-                  ref={fileInputRef}
-                  className="hidden" 
-                  accept="image/*"
-                  onChange={handleImageChange}
-                />
+                  )}
+                  <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageChange} />
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input 
-                  label="Restaurant Name" 
-                  icon={Utensils} 
-                  placeholder="Wisteria Chalet" 
-                  value={formData.name}
-                  onChange={(e) => handleChange('name', e.target.value)}
-                />
-
-                <Input 
-                  label="Location / Address" 
-                  icon={MapPin} 
-                  placeholder="Street, City" 
-                  value={formData.location}
-                  onChange={(e) => handleChange('location', e.target.value)}
-                />
-
-                <Input 
-                  label="Type of Food" 
-                  icon={Pizza} 
-                  placeholder="Italian, Continental" 
-                  value={formData.foodType}
-                  onChange={(e) => handleChange('foodType', e.target.value)}
-                />
-
-                <Input 
-                  label="Budget Per Person" 
-                  icon={Banknote} 
-                  type="number"
-                  placeholder="50" 
-                  value={formData.budget}
-                  onChange={(e) => handleChange('budget', e.target.value)}
-                />
+                {/* --- ADDED VENUE TYPE OPTION HERE --- */}
+                <div className="md:col-span-2 space-y-2">
+                    <label className="text-xs font-black text-gray-400 uppercase ml-2">Venue Type *</label>
+                    <div className="flex gap-4">
+                        {VENUE_TYPES.map(type => (
+                            <button
+                                key={type}
+                                onClick={() => handleChange('venueType', type)}
+                                className={`flex-1 py-3 px-6 rounded-2xl font-bold transition-all border-2 flex items-center justify-center gap-2 ${
+                                    formData.venueType === type 
+                                    ? 'bg-[#632281] border-[#632281] text-white shadow-md' 
+                                    : 'bg-white border-purple-100 text-purple-400 hover:border-purple-200'
+                                }`}
+                            >
+                                {type === 'Restaurant' ? <Utensils size={18} /> : <Coffee size={18} />}
+                                {type}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                {/* ------------------------------------ */}
 
                 <div className="md:col-span-2">
-                  <Input 
-                    label="Contact Email Address" 
-                    icon={Mail} 
-                    type="email"
-                    placeholder="contact@restaurant.com" 
-                    value={formData.email}
-                    onChange={(e) => handleChange('email', e.target.value)}
-                  />
+                    <Input label="Business Name *" icon={Utensils} value={formData.businessName} onChange={(e) => handleChange('businessName', e.target.value)} />
                 </div>
+                <div className="md:col-span-2">
+                    <Input label="Contact Email *" icon={Mail} type="email" value={formData.email} onChange={(e) => handleChange('email', e.target.value)} />
+                </div>
+                <div className="md:col-span-2">
+                    <Input label="Street Address *" icon={MapPin} value={formData.streetAddress} onChange={(e) => handleChange('streetAddress', e.target.value)} />
+                </div>
+                <Input label="City, State" icon={Globe} placeholder="Mumbai, Maharashtra" value={formData.cityState} onChange={(e) => handleChange('cityState', e.target.value)} />
+                <Input label="Pincode" icon={Hash} placeholder="400001" value={formData.pincode} onChange={(e) => handleChange('pincode', e.target.value)} />
+                <div className="md:col-span-2">
+                    <Input label="Google Maps Link" icon={Link} placeholder="Paste URL here" value={formData.googleMapsLink} onChange={(e) => handleChange('googleMapsLink', e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-xs font-black text-gray-400 uppercase ml-2">Type of Food</label>
+                    <select className="w-full px-6 py-4 bg-purple-50 rounded-2xl font-bold text-gray-700 outline-none border-none" value={formData.typeOfFood} onChange={(e) => handleChange('typeOfFood', e.target.value)}>
+                        {FOOD_TYPES.map(food => <option key={food} value={food}>{food}</option>)}
+                    </select>
+                </div>
+                <Input label="Budget Per Person" icon={Banknote} type="number" value={formData.budgetPerPerson} onChange={(e) => handleChange('budgetPerPerson', e.target.value)} />
               </div>
 
-              <div className="pt-4 flex flex-col sm:flex-row gap-4">
-                <Button 
-                  onClick={handleCreateRestaurant}
-                  className="flex-1 py-4 flex items-center justify-center gap-2 bg-[#632281] text-white hover:bg-[#4a1961] shadow-lg shadow-purple-100 font-bold rounded-2xl"
-                >
-                  <Save size={20} />
-                  <span>Save Restaurant</span>
+              <div className="flex gap-4 pt-6">
+                <Button onClick={handleSave} className="flex-1 py-5 bg-[#632281] text-white font-black uppercase text-xs tracking-widest rounded-2xl shadow-xl hover:bg-purple-900 transition-all">
+                    {editId ? 'Update Partner' : 'Save Partner'}
                 </Button>
-                
-                <Button 
-                  variant="outline" 
-                  onClick={handleReset}
-                  className="px-8 py-4 flex items-center justify-center gap-2 border-purple-200 text-purple-600 hover:bg-purple-50 font-bold rounded-2xl"
-                >
-                  <RotateCcw size={20} />
-                  <span>Reset Form</span>
-                </Button>
+                <Button variant="outline" onClick={() => setIsModalOpen(false)} className="px-8 py-5 border-gray-100 text-gray-400 font-black uppercase text-xs rounded-2xl">Cancel</Button>
               </div>
             </div>
           </div>

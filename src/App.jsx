@@ -1,46 +1,65 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
-// Import Layout Components
+// 1. IMPORT LAYOUT COMPONENTS
 import Sidebar from './components/Layout/Sidebar';
 import TopNav from './components/Layout/TopNav';
 
-// Import Pages
+// 2. IMPORT ALL PAGES (Ensure these paths match your folder structure)
+import Login from './pages/Login'; // <--- THIS WAS LIKELY MISSING
 import Overview from './pages/Overview';
 import Interviews from './pages/Interviews';
 import PlannedDates from './pages/PlannedDates';
 import Restaurants from './pages/Restaurants';
-import Login from './pages/Login';
+import Demographics from './pages/Demographics';
+import Interviewers from './pages/Interviewers';
+
+// 3. RBAC PROTECTED ROUTE COMPONENT
+const ProtectedRoute = ({ children, allowedRoles }) => {
+  const userRole = localStorage.getItem('userRole');
+  const token = localStorage.getItem('token');
+
+  // If not logged in, send to login
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // If role not allowed for this page, redirect to their default home
+  if (!allowedRoles.includes(userRole)) {
+    return <Navigate to={userRole === 'psychiatrist' ? "/interviews" : "/overview"} replace />;
+  }
+
+  return children;
+};
 
 const AppContent = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
+  const userRole = localStorage.getItem('userRole');
   
-  // FIXED: Now both "/" and "/login" are treated as Login pages without Sidebar/TopNav
   const isLoginPage = location.pathname === '/' || location.pathname === '/login';
 
-  // Helper to get title based on path
+  // HELPER: Get title based on path
   const getTitle = () => {
     const path = location.pathname.split('/')[1];
     if (!path || path === 'login') return 'Welcome';
-    return path;
+    return path.charAt(0).toUpperCase() + path.slice(1);
   };
 
-  // 1. LOGIN LAYOUT (No Sidebar, No TopNav)
+  // LOGIN LAYOUT
   if (isLoginPage) {
     return (
       <div className="min-h-screen bg-white">
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
-          {/* If they try to go to a non-existent page while logged out, send to login */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
     );
   }
 
-  // 2. DASHBOARD LAYOUT (With Sidebar and TopNav)
+  // DASHBOARD LAYOUT (With Sidebar and TopNav)
   return (
     <div className="min-h-screen bg-[#FAFAFB] flex">
       <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
@@ -53,14 +72,44 @@ const AppContent = () => {
 
         <main className="p-6 md:p-10 flex-1">
           <Routes>
-            {/* The dashboard routes only start from /overview, /interviews etc. */}
-            <Route path="/overview" element={<Overview />} />
-            <Route path="/interviews" element={<Interviews />} />
-            <Route path="/dates" element={<PlannedDates />} />
-            <Route path="/restaurants" element={<Restaurants />} />
-            
-            {/* If they are in the dashboard area and hit an unknown route, go to overview */}
-            <Route path="*" element={<Navigate to="/overview" />} />
+            {/* ADMIN ONLY ROUTES */}
+            <Route path="/overview" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Overview />
+              </ProtectedRoute>
+            } />
+            <Route path="/demographics" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Demographics />
+              </ProtectedRoute>
+            } />
+            <Route path="/interviewer-list" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Interviewers />
+              </ProtectedRoute>
+            } />
+            <Route path="/dates" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <PlannedDates />
+              </ProtectedRoute>
+            } />
+            <Route path="/restaurants" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Restaurants />
+              </ProtectedRoute>
+            } />
+
+            {/* SHARED ROUTES (Psychiatrist can access) */}
+            <Route path="/interviews" element={
+              <ProtectedRoute allowedRoles={['admin', 'psychiatrist']}>
+                <Interviews />
+              </ProtectedRoute>
+            } />
+
+            {/* FALLBACK REDIRECT */}
+            <Route path="*" element={
+              <Navigate to={userRole === 'psychiatrist' ? "/interviews" : "/overview"} />
+            } />
           </Routes>
         </main>
       </div>

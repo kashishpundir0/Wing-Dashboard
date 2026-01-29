@@ -7,7 +7,7 @@ const GenderChart = ({ maleCount, femaleCount, regionalBreakdown = [] }) => {
   const femalePercent = Math.round((femaleCount / total) * 100);
 
   return (
-    <div className="bg-purple-100 rounded-3xl border border-gray-100 shadow-xl overflow-hidden">
+    <div className="bg-purple-100 rounded-xl border border-gray-100 shadow-xl overflow-hidden">
       <div className="grid grid-cols-1 lg:grid-cols-3">
         
         {/* Main Chart Area */}

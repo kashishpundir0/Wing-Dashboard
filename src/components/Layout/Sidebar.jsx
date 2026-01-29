@@ -6,21 +6,36 @@ import {
   Clock, 
   Utensils, 
   LogOut,
-  X 
+  X ,
+  BarChart3,
+  Users
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const navigate = useNavigate();
 
+  // 1. Get role safely (default to empty string if null)
+  const userRole = localStorage.getItem('userRole') || "";
+
+  // 2. Define which roles can see which items
   const menuItems = [
-    { id: 'overview', label: 'Overview', icon: LayoutDashboard, path: '/overview' },
-    { id: 'interviews', label: 'Interviews', icon: Calendar, path: '/interviews' },
-    { id: 'dates', label: 'Planned Dates', icon: Clock, path: '/dates' },
-    { id: 'restaurants', label: 'Restaurants', icon: Utensils, path: '/restaurants' },
+    { id: 'overview', label: 'Overview', icon: LayoutDashboard, path: '/overview', roles: ['admin'] },
+    { id: 'demographics', label: 'Demographics', icon: BarChart3, path: '/demographics', roles: ['admin'] },
+    { id: 'interviews', label: 'Interviews', icon: Calendar, path: '/interviews', roles: ['admin', 'psychiatrist'] },
+    { id: 'interviewer-list', label: 'Interviewers', icon: Users, path: '/interviewer-list', roles: ['admin'] },
+    { id: 'dates', label: 'Planned Dates', icon: Clock, path: '/dates', roles: ['admin'] },
+    { id: 'restaurants', label: 'Restaurants', icon: Utensils, path: '/restaurants', roles: ['admin'] },
   ];
+
+  // 3. Filter with Safety Check
+  // item?.roles? checks if roles exists before calling .includes
+  const filteredMenuItems = menuItems.filter(item => 
+    item?.roles?.includes(userRole)
+  );
 
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to log out?")) {
+      localStorage.clear(); // Clear role and token
       navigate('/');
     }
   };
@@ -45,10 +60,13 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         {/* Logo Section */}
         <div className="p-8 flex items-center justify-between bg-purple-200 border-b border-gray-200">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#632281] rounded-full flex items-center justify-center text-white font-black text-xl shadow-lg">W</div>
-            <span className="text-xl font-bold text-[#632281]">Admin</span>
+            <div className="w-10 h-10 bg-[#632281] rounded-full flex items-center justify-center text-white font-black text-xl shadow-lg">
+              {userRole ? userRole.charAt(0).toUpperCase() : 'W'}
+            </div>
+            <span className="text-xl font-bold text-[#632281]">
+                {userRole === 'admin' ? 'Admin' : 'Psychiatrist'}
+            </span>
           </div>
-          {/* Close button for mobile */}
           <button onClick={() => setIsOpen(false)} className="lg:hidden text-gray-500 hover:bg-gray-100 p-1 rounded-lg">
             <X size={24} />
           </button>
@@ -56,7 +74,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
         {/* Navigation Section */}
         <nav className="flex-1 px-4 space-y-2 overflow-y-auto pb-24">
-          {menuItems.map((item) => (
+          {filteredMenuItems.map((item) => (
             <NavLink
               key={item.id}
               to={item.path}
