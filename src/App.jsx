@@ -14,17 +14,17 @@ import Restaurants from './pages/Restaurants';
 import Demographics from './pages/Demographics';
 import Interviewers from './pages/Interviewers';
 
-// 3. RBAC PROTECTED ROUTE COMPONENT
+//    RBAC 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const userRole = localStorage.getItem('userRole');
   const token = localStorage.getItem('token');
 
-  // If not logged in, send to login
+  
   if (!token) {
     return <Navigate to="/login" replace />;
   }
 
-  // If role not allowed for this page, redirect to their default home
+  
   if (!allowedRoles.includes(userRole)) {
     return <Navigate to={userRole === 'psychiatrist' ? "/interviews" : "/overview"} replace />;
   }
@@ -39,7 +39,7 @@ const AppContent = () => {
   
   const isLoginPage = location.pathname === '/' || location.pathname === '/login';
 
-  // HELPER: Get title based on path
+
   const getTitle = () => {
     const path = location.pathname.split('/')[1];
     if (!path || path === 'login') return 'Welcome';
