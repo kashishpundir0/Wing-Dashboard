@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast'; 
 import { Heart, MapPin, Sparkles, Clock, Calendar, X, Mail, Lock, Phone } from 'lucide-react';
 import { registerInterviewer, updateInterviewer } from '../api/interviewerApi';
 
@@ -40,29 +41,31 @@ const WingmatesSignUp = ({ onClose, refreshData, isModal = false, initialData = 
     setLoading(true);
 
     try {
-      // 🔥 FIX: Remove internal MongoDB fields that cause 400/500 errors
       const { _id, __v, createdAt, updatedAt, ...cleanPayload } = formData;
+      
+      if (initialData?._id && !cleanPayload.password) {
+        delete cleanPayload.password;
+      }
 
-      // Ensure role is strictly 'interviewer'
       cleanPayload.role = 'interviewer';
 
       if (initialData?._id) {
-        // UPDATE MODE
         await updateInterviewer(initialData._id, cleanPayload);
-        alert('Interviewer Updated Successfully!');
+        toast.success('Record Updated Successfully!', { duration: 3000 });
       } else {
-        // REGISTER MODE
         await registerInterviewer(cleanPayload);
-        alert('Interviewer Registered Successfully!');
+        toast.success('Registration Successful!', { duration: 3000 });
       }
 
       if (refreshData) refreshData();
       if (onClose) onClose();
     } catch (error) {
-      // Log the actual error message from the server to help debugging
-      const errorMsg = error.response?.data?.message || error.response?.data?.error || 'Operation failed';
-      console.error("API Error:", error.response?.data);
-      alert(`Error: ${errorMsg}`);
+      const action = initialData ? "Update" : "Registration";
+      const serverMsg = error.response?.data?.message || error.response?.data?.error || 'Operation failed';
+      
+      console.error(`${action} Error:`, error.response?.data);
+      
+      toast.error(`${action} failed: ${serverMsg}`, { duration: 5000 });
     } finally {
       setLoading(false);
     }
@@ -98,7 +101,7 @@ const WingmatesSignUp = ({ onClose, refreshData, isModal = false, initialData = 
                   </div>
                   <div className="space-y-1">
                       <label className="text-[10px] font-black text-gray-400 uppercase ml-1 tracking-widest">Password</label>
-                      <input required={!initialData} type="password" name="password" value={formData.password} onChange={handleChange} className="w-full px-4 py-3 bg-white rounded-2xl border border-gray-100 focus:border-purple-400 outline-none font-bold text-sm shadow-sm transition-all" placeholder={initialData ? '••••••••' : 'Enter password'} />
+                      <input required={!initialData} type="password" name="password" value={formData.password} onChange={handleChange} className="w-full px-4 py-3 bg-white rounded-2xl border border-gray-100 focus:border-purple-400 outline-none font-bold text-sm shadow-sm transition-all" placeholder={initialData ? 'Leave empty to keep same' : 'Enter password'} />
                   </div>
               </div>
 

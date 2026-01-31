@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
+import toast, { Toaster } from 'react-hot-toast'; // Professional Toast Library
 import { 
-  Utensils, MapPin, Pizza, Banknote, X, Plus, Upload, Globe, Hash, Link, Coffee, Camera, Trash2, Edit3, Mail, Building2 
-} from 'lucide-react'; // Added Building2 icon
+  Utensils, MapPin, Pizza, Banknote, X, Plus, Link, Coffee, Camera, Trash2, Edit3, Mail, Globe, Hash 
+} from 'lucide-react'; 
 import { Input } from '../components/Shared/Input';
 import { Button } from '../components/Shared/Button';
 import { 
@@ -36,12 +37,14 @@ const Restaurants = () => {
     venuePhoto: null 
   });
 
+  // Fetch Data
   const fetchRestaurants = async () => {
     setLoading(true);
     try {
       const result = await getAllRestaurants();
       setRestaurantList(result.data || []);
     } catch (error) {
+      toast.error("Could not sync with server.");
       console.error("Fetch error", error);
     } finally {
       setLoading(false);
@@ -73,51 +76,56 @@ const Restaurants = () => {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  // --- SAVE / UPDATE WITH TOAST IN MIDDLE ---
   const handleSave = async () => {
+    // Validation Toast
     if (!formData.businessName || !formData.email || !formData.streetAddress) {
-      alert("Please fill in Name, Email, and Address");
+      toast.error("Required fields are missing!", {
+        style: { borderRadius: '15px', background: '#333', color: '#fff' }
+      });
       return;
     }
 
     const data = new FormData();
-    data.append('venueType', formData.venueType);
-    data.append('businessName', formData.businessName);
-    data.append('email', formData.email); 
-    data.append('streetAddress', formData.streetAddress);
-    data.append('cityState', formData.cityState);
-    data.append('pincode', formData.pincode);
-    data.append('googleMapsLink', formData.googleMapsLink);
-    data.append('typeOfFood', formData.typeOfFood);
-    data.append('budgetPerPerson', formData.budgetPerPerson);
-    
-    if (formData.venuePhoto) {
-      data.append('venuePhoto', formData.venuePhoto);
-    }
+    Object.keys(formData).forEach(key => {
+        if (formData[key] !== null) data.append(key, formData[key]);
+    });
 
-    try {
-      if (editId) {
-        await updateRestaurant(editId, data);
-        alert("Venue Updated Successfully!");
-      } else {
-        await addRestaurant(data);
-        alert("Venue Added Successfully!");
-      }
-      fetchRestaurants();
-      setIsModalOpen(false);
-      handleReset();
-    } catch (error) {
-      console.error("Save error:", error.response?.data);
-      alert("Error: " + (error.response?.data?.message || "Failed to save partner"));
-    }
+    // Create a promise for the API call
+    const apiCall = editId ? updateRestaurant(editId, data) : addRestaurant(data);
+
+    // Show loading, success, and error toast in the middle
+    toast.promise(apiCall, {
+      loading: editId ? 'Updating details...' : 'Adding new venue...',
+      success: () => {
+        fetchRestaurants();
+        setIsModalOpen(false);
+        handleReset();
+        return editId ? 'Venue updated successfully! 🎉' : 'New venue onboarded! 🥂';
+      },
+      error: (err) => err.response?.data?.message || 'Something went wrong.',
+    }, {
+      style: {
+        minWidth: '250px',
+        fontWeight: 'bold',
+        borderRadius: '16px'
+      },
+      success: {
+        duration: 4000,
+        icon: '✅',
+      },
+    });
   };
 
+  // Delete Action
   const handleDelete = async (id) => {
-    if (window.confirm("Delete this venue partner?")) {
+    if (window.confirm("Remove this partner?")) {
       try {
         await deleteRestaurant(id);
+        toast.success("Venue deleted successfully");
         fetchRestaurants();
       } catch (error) {
-        alert("Delete failed");
+        toast.error("Failed to delete.");
       }
     }
   };
@@ -147,21 +155,42 @@ const Restaurants = () => {
 
   return (
     <div className="max-w-8xl mx-auto space-y-8">
+      {/* 
+         TOASTER COMPONENT: 
+         Position "top-center" puts the toast in the top-middle. 
+      */}
+      <Toaster 
+        position="top-center" 
+        reverseOrder={false} 
+        toastOptions={{
+            duration: 3000,
+            style: {
+                background: '#fff',
+                color: '#632281',
+                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                padding: '16px',
+            },
+        }}
+      />
+
       {/* Header */}
       <div className="flex flex-col md:items-center md:flex-row justify-between gap-2 bg-purple-100 p-5 rounded-xl border border-purple-200">
         <div>
           <h2 className="text-xl font-black text-gray-800">Venue Partners</h2>
           <p className="text-purple-500 font-medium">Manage Restaurants & Cafes locations</p>
         </div>
-        <Button onClick={() => { handleReset(); setIsModalOpen(true); }} className="flex items-center gap-2 bg-[#632281] text-white px-8 py-4 rounded-2xl shadow-lg">
+        <Button onClick={() => { handleReset(); setIsModalOpen(true); }} className="flex items-center gap-2 bg-[#632281] text-white px-8 py-4 rounded-2xl shadow-lg transition-transform hover:scale-105 active:scale-95">
           <Plus size={20} />
           <span>Add New Venue</span>
         </Button>
       </div>
 
-      {/* Grid */}
+      {/* Main Content (Loading or Grid) */}
       {loading ? (
-          <div className="text-center py-20 font-bold text-purple-600 animate-pulse">Loading partners...</div>
+          <div className="text-center py-24 flex flex-col items-center gap-4">
+              <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+              <p className="font-black text-purple-600 uppercase tracking-widest text-xs">Loading network...</p>
+          </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {restaurantList.map((rest) => (
@@ -189,11 +218,6 @@ const Restaurants = () => {
                                 <p className="text-xs truncate">{rest.cityState} - {rest.pincode}</p>
                             </div>
                         </div>
-                        {rest.googleMapsLink && (
-                            <a href={rest.googleMapsLink} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-[10px] font-black text-purple-600 uppercase tracking-tighter hover:underline">
-                                <Link size={12}/> View Maps
-                            </a>
-                        )}
                     </div>
                     <div className="pt-6 border-t border-purple-50 flex justify-between items-center">
                         <div>
@@ -214,7 +238,7 @@ const Restaurants = () => {
         </div>
       )}
 
-      {/* Modal */}
+      {/* Modal Overlay */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
           <div className="bg-purple-100 w-full max-w-xl rounded-xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
@@ -240,7 +264,6 @@ const Restaurants = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* --- ADDED VENUE TYPE OPTION HERE --- */}
                 <div className="md:col-span-2 space-y-2">
                     <label className="text-xs font-black text-gray-400 uppercase ml-2">Venue Type *</label>
                     <div className="flex gap-4">
@@ -260,7 +283,6 @@ const Restaurants = () => {
                         ))}
                     </div>
                 </div>
-                {/* ------------------------------------ */}
 
                 <div className="md:col-span-2">
                     <Input label="Business Name *" icon={Utensils} value={formData.businessName} onChange={(e) => handleChange('businessName', e.target.value)} />
@@ -278,7 +300,7 @@ const Restaurants = () => {
                 </div>
                 <div className="space-y-2">
                     <label className="text-xs font-black text-gray-400 uppercase ml-2">Type of Food</label>
-                    <select className="w-full px-6 py-4 bg-purple-50 rounded-2xl font-bold text-gray-700 outline-none border-none" value={formData.typeOfFood} onChange={(e) => handleChange('typeOfFood', e.target.value)}>
+                    <select className="w-full px-6 py-4 bg-purple-50 rounded-2xl font-bold text-gray-700 outline-none border-none cursor-pointer" value={formData.typeOfFood} onChange={(e) => handleChange('typeOfFood', e.target.value)}>
                         {FOOD_TYPES.map(food => <option key={food} value={food}>{food}</option>)}
                     </select>
                 </div>
@@ -289,7 +311,7 @@ const Restaurants = () => {
                 <Button onClick={handleSave} className="flex-1 py-5 bg-[#632281] text-white font-black uppercase text-xs tracking-widest rounded-2xl shadow-xl hover:bg-purple-900 transition-all">
                     {editId ? 'Update Partner' : 'Save Partner'}
                 </Button>
-                <Button variant="outline" onClick={() => setIsModalOpen(false)} className="px-8 py-5 border-gray-100 text-gray-400 font-black uppercase text-xs rounded-2xl">Cancel</Button>
+                <Button variant="outline" onClick={() => setIsModalOpen(false)} className="px-8 py-5 border-gray-200 text-gray-400 font-black uppercase text-xs rounded-2xl hover:bg-gray-50">Cancel</Button>
               </div>
             </div>
           </div>
