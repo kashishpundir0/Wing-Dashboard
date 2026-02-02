@@ -72,7 +72,7 @@ const WingmatesSignUp = ({ onClose, refreshData, isModal = false, initialData = 
   };
 
   return (
-    <div className={`w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden relative ${!isModal ? 'mx-auto my-10 border border-purple-100' : ''}`}>
+    <div className={`w-full max-w-2xl bg-white rounded-xl shadow-2xl overflow-hidden relative ${!isModal ? 'mx-auto my-10 border border-purple-100' : ''}`}>
       
       <div className="bg-[#632281] p-8 text-center relative overflow-hidden">
           <div className="absolute top-0 left-0 w-24 h-24 bg-white/10 rounded-full -translate-x-10 -translate-y-10 blur-2xl"></div>
@@ -116,7 +116,7 @@ const WingmatesSignUp = ({ onClose, refreshData, isModal = false, initialData = 
                   </div>
               </div>
 
-              <div className="bg-purple-50/50 p-6 rounded-[2rem] border border-purple-100 space-y-4">
+              <div className="bg-purple-50/50 p-6 rounded-xl border border-purple-100 space-y-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Calendar size={14} className="text-[#632281]" />
                     <span className="text-[10px] font-black text-[#632281] uppercase tracking-widest">Availability Details</span>

@@ -177,7 +177,7 @@ const PlannedDates = () => {
                 </div>
 
                 {activeTab === 'cancelled' && (
-                  <div className="mb-6 p-3 bg-rose-50 rounded-2xl flex items-start gap-3 border border-rose-100">
+                  <div className="mb-6 p-3 bg-rose-50 rounded-xl flex items-start gap-3 border border-rose-100">
                     <AlertCircle size={16} className="text-rose-500 shrink-0 mt-0.5" />
                     <p className="text-[11px] font-bold text-rose-600 leading-tight">Reason: {d.cancelReason}</p>
                   </div>
@@ -214,7 +214,7 @@ const PlannedDates = () => {
       {/* --- Detail Modal (Includes Contact Info) --- */}
       {viewingDetails && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#632281]/20 backdrop-blur-md">
-          <div className="bg-purple-100 w-full max-w-lg rounded-[3.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+          <div className="bg-purple-100 w-full max-w-lg rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="p-10">
               <div className="flex justify-between items-center mb-8">
                 <div>
@@ -230,7 +230,7 @@ const PlannedDates = () => {
 
               <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2 no-scrollbar">
                 {/* Restaurant */}
-                <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-purple-50">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-purple-50">
                   <p className="text-[10px] font-black text-purple-300 uppercase mb-3">Restaurant</p>
                   <h4 className="text-lg font-black text-[#632281] mb-2">{viewingDetails.restaurant}</h4>
                   <div className="flex items-center gap-3 text-sm font-bold text-slate-600 mb-2">
@@ -244,7 +244,7 @@ const PlannedDates = () => {
                 {/* Users Contact Details */}
                 <div className="grid grid-cols-1 gap-4">
                   {viewingDetails.participants.map((u, idx) => (
-                    <div key={idx} className="bg-white p-5 rounded-[2rem] shadow-sm border border-purple-50 flex items-center gap-4">
+                    <div key={idx} className="bg-white p-5 rounded-xl shadow-sm border border-purple-50 flex items-center gap-4">
                       <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-lg ${idx === 0 ? 'bg-[#632281]' : 'bg-purple-400'}`}>
                         {u.photo}
                       </div>

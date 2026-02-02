@@ -121,7 +121,7 @@ const Interviewers = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {interviewers.map((person) => (
-            <div key={person._id} className="bg-linear-to-br from-purple-200 to-pink-100 p-6 rounded-[2.5rem] shadow-sm border border-gray-100 hover:border-purple-300 transition-all group relative">
+            <div key={person._id} className="bg-linear-to-br from-purple-200 to-pink-100 p-6 rounded-xl shadow-sm border border-gray-100 hover:border-purple-300 transition-all group relative">
               <div className="absolute top-6 right-6 flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
                 <button onClick={() => openEditModal(person)} className="p-2.5 bg-white text-purple-600 rounded-xl shadow-md hover:bg-purple-50">
                   <Edit3 size={16} />
