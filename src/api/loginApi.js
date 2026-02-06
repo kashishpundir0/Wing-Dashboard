@@ -39,3 +39,16 @@ export const registerAdmin = async (credentials) => {
     throw new Error(errorMessage);
   }
 };
+
+export const forgotPassword = async (email) => {
+  const response = await fetch('/api/forgot-password', { // Replace with your actual endpoint
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to send reset link');
+  }
+  return response.json();
+};

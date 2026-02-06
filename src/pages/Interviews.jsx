@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Video, X, MapPin, CheckCircle2, MessageSquare, 
-  Send, ChevronRight, Ruler, Target, Bell, AlertCircle
+  Video, X, MapPin, CheckCircle2, Ruler, 
+  Phone, Star, Calendar, Clock, Briefcase, 
+  Instagram, Heart, User, Layers, AlertCircle
 } from 'lucide-react';
-import { Button } from '../components/Shared/Button';
 
-// --- Responsive Toast Component ---
 const Toast = ({ message, type, onClose }) => {
   useEffect(() => {
     const timer = setTimeout(onClose, 3000);
@@ -13,18 +12,12 @@ const Toast = ({ message, type, onClose }) => {
   }, [onClose]);
 
   return (
-    // Responsive positioning: top-4 on mobile, top-10 on desktop
-    <div className="fixed top-4 right-4 left-4 md:left-auto md:top-10 md:right-10 z-[100] animate-in slide-in-from-top-10 md:slide-in-from-right-10 duration-300">
-      <div className={`flex items-center gap-3 px-4 md:px-6 py-3 md:py-4 rounded-2xl shadow-2xl border ${
-        type === 'success' 
-          ? 'bg-emerald-50 border-emerald-100 text-emerald-700' 
-          : 'bg-red-50 border-red-100 text-red-700'
+    <div className="fixed top-10 right-10 z-[110] animate-in slide-in-from-right-10 duration-300">
+      <div className={`flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border ${
+        type === 'success' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' : 'bg-red-50 border-red-100 text-red-700'
       }`}>
-        {type === 'success' ? <CheckCircle2 size={20} className="shrink-0" /> : <AlertCircle size={20} className="shrink-0" />}
+        {type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
         <p className="font-bold text-sm">{message}</p>
-        <button onClick={onClose} className="ml-auto opacity-50 hover:opacity-100">
-          <X size={16} />
-        </button>
       </div>
     </div>
   );
@@ -32,8 +25,6 @@ const Toast = ({ message, type, onClose }) => {
 
 const Interviews = () => {
   const [selectedUser, setSelectedUser] = useState(null);
-  const [showRejectReason, setShowRejectReason] = useState(false);
-  const [reason, setReason] = useState('');
   const [notification, setNotification] = useState(null);
 
   const showNotify = (msg, type = 'success') => {
@@ -43,215 +34,226 @@ const Interviews = () => {
   const data = [
     { 
         id: 1, 
-        name: 'Sarah Jenkins', 
-        age: 24,
+        name: 'Jessica Parker', 
+        age: 23,
+        jobTitle: 'Senior Software Developer',
+        compatibility: '94%',
         time: '10:30 AM', 
         date: '24 Jan', 
         height: "5'7\"", 
-        photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400', 
-        bio: 'Looking for someone who can keep up with my hiking pace and doesn\'t mind a coffee date that turns into dinner.',
-        location: 'Manhattan, NY',
-        goals: 'Long-term relationship',
-        interests: ['Reading', 'Singing', 'Vegan Cooking', 'Photography'],
-        lifestyle: { drink: 'Socially', smoke: 'Never', exercise: 'Active' }
+        photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800', 
+        gallery: [
+            'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400',
+            'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400',
+            'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400',
+            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400',
+        ],
+        location: 'Chicago, IL, United States',
+        distance: '1.2 km away',
+        aboutMe: ['Bengaluru, India', 'Vegetarian', 'Hindu', 'Occasionally 🍸', 'Never 🚬', 'Yoga Enthusiast'],
+        story: 'I am a creative soul who loves blending technology with art. My name is Jessica and I enjoy meeting new people and finding ways to help them have an uplifting experience. I enjoy reading sci-fi and hiking on weekends.',
+        interests: ['Tech', 'Hiking', 'Art', 'Music', 'Cooking', 'Travel'],
+        lifestyle: { drink: 'Socially', smoke: 'Never', exercise: 'Daily' }
     },
   ];
 
-  const handleApprove = () => {
-    showNotify(`${selectedUser.name}'s profile has been approved!`);
-    setSelectedUser(null);
-  };
-
-  const handleRejectSubmit = () => {
-    showNotify(`Profile Rejected. Reason sent to ${selectedUser.name}`, 'error');
-    setSelectedUser(null);
-    setShowRejectReason(false);
-    setReason('');
-  };
-
   return (
-    <div className="relative p-2 md:p-0">
-      {notification && (
-        <Toast 
-          message={notification.msg} 
-          type={notification.type} 
-          onClose={() => setNotification(null)} 
-        />
-      )}
+    <div className="relative p-4 md:p-6 bg-gray-50 min-h-screen">
+      {notification && <Toast message={notification.msg} type={notification.type} onClose={() => setNotification(null)} />}
 
-      <div className="bg-purple-100 rounded-2xl min-h-screen border border-purple-100 shadow-xl overflow-hidden">
-        
-        {/* DESKTOP TABLE VIEW (Hidden on mobile) */}
-        <div className="hidden md:block overflow-x-auto">
-            <table className="w-full text-left">
-            <thead className="bg-[#632281] border-b border-purple-300">
-                <tr>
-                <th className="px-8 py-6 text-xs font-black text-white uppercase tracking-widest">Candidate</th>
-                <th className="px-8 py-6 text-xs font-black text-white uppercase tracking-widest">Interview Slot</th>
-                <th className="px-8 py-6 text-xs font-black text-white uppercase tracking-widest text-right">Actions</th>
-                </tr>
-            </thead>
-            <tbody className="divide-y divide-purple-50">
-                {data.map((user) => (
-                <tr key={user.id} className="hover:bg-purple-50/50 transition-colors">
-                    <td className="px-8 py-5 flex items-center gap-4">
-                        <div className="relative">
-                            <img src={user.photo} className="w-14 h-14 rounded-2xl object-cover ring-2 ring-purple-100" alt="" />
-                            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
-                        </div>
-                        <div>
-                            <p className="font-bold text-gray-800 text-lg">{user.name}, {user.age}</p>
-                            <p className="text-xs text-purple-500 font-bold flex items-center gap-1">
-                                <MapPin size={10} /> {user.location}
-                            </p>
-                        </div>
-                    </td>
-                    <td className="px-8 py-5">
-                        <div className="bg-white border border-purple-100 rounded-xl px-3 py-2 inline-block shadow-sm">
-                            <p className="text-sm font-bold text-gray-700">{user.date}</p>
-                            <p className="text-[10px] text-[#632281] font-black uppercase">{user.time}</p>
-                        </div>
-                    </td>
-                    <td className="px-8 py-5 text-right">
-                        <div className="flex justify-end gap-3">
-                            <button onClick={() => showNotify('Joining video...')} className="p-3 bg-green-500 text-white rounded-2xl hover:bg-green-600 shadow-md">
-                                <Video size={20} />
-                            </button>
-                            <Button onClick={() => setSelectedUser(user)} className="py-2.5 px-6 rounded-2xl bg-[#632281] text-white hover:bg-purple-900 font-bold text-sm">
-                                Review
-                            </Button>
-                        </div>
-                    </td>
-                </tr>
-                ))}
-            </tbody>
+      <div className="  mx-auto">
+        {/* Header Section */}
+      
+
+        {/* MAIN TABLE */}
+        <div className="bg-white rounded-xl shadow-xl shadow-purple-100/50 border border-purple-50 overflow-hidden">
+            <table className="w-full text-left border-collapse">
+                <thead className="bg-[#632281]">
+                    <tr>
+                        <th className="px-10 py-6 text-[11px] font-black text-purple-100 uppercase tracking-[0.2em]">Candidate</th>
+                        <th className="px-10 py-6 text-[11px] font-black text-purple-100 uppercase tracking-[0.2em]">Schedule</th>
+                        <th className="px-10 py-6 text-[11px] font-black text-purple-100 uppercase tracking-[0.2em] text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                    {data.map((user) => (
+                    <tr key={user.id} className="group hover:bg-purple-50/30 transition-all duration-300">
+                        <td 
+                            className="px-10 py-6 cursor-pointer"
+                            onClick={() => setSelectedUser(user)}
+                        >
+                            <div className="flex items-center gap-5">
+                                <div className="relative">
+                                    <img src={user.photo} className="w-16 h-16 rounded-[1.5rem] object-cover ring-4 ring-purple-50 group-hover:ring-purple-200 transition-all shadow-md" alt="" />
+                                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-4 border-white rounded-full shadow-sm"></div>
+                                </div>
+                                <div>
+                                    <p className="font-black text-gray-800 text-xl group-hover:text-[#632281] transition-colors">{user.name}, {user.age}</p>
+                                    <p className="text-xs text-gray-400 font-bold flex items-center gap-1 mt-0.5">
+                                        <MapPin size={12} className="text-purple-400" /> {user.location}
+                                    </p>
+                                </div>
+                            </div>
+                        </td>
+                        <td className="px-10 py-6">
+                            <div className="flex items-center gap-3 bg-gray-50 w-fit px-4 py-2 rounded-2xl border border-gray-100">
+                                <Calendar size={16} className="text-[#632281]" />
+                                <div>
+                                    <p className="text-sm font-black text-gray-700 leading-none">{user.date}</p>
+                                    <p className="text-[10px] text-[#632281] font-black uppercase mt-1">{user.time}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td className="px-10 py-6 text-right">
+                            <div className="flex justify-end gap-3 opacity-80 group-hover:opacity-100 transition-opacity">
+                                <button onClick={() => showNotify('Joining Video...')} className="p-3.5 bg-green-500 text-white rounded-2xl hover:bg-green-600 shadow-lg shadow-green-100 transition-transform hover:-translate-y-1">
+                                    <Video size={20} />
+                                </button>
+                                <button onClick={() => showNotify('Profile Rejected', 'error')} className="px-6 py-3 rounded-2xl bg-red-50 text-red-600 border border-red-100 font-bold text-sm hover:bg-red-100 transition-all">
+                                    Reject
+                                </button>
+                                <button onClick={() => showNotify('Profile Approved')} className="px-6 py-3 rounded-2xl bg-[#632281] text-white font-bold text-sm hover:bg-purple-900 shadow-lg shadow-purple-100 transition-all hover:-translate-y-1">
+                                    Approve
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    ))}
+                </tbody>
             </table>
         </div>
 
-        {/* MOBILE CARD VIEW (Visible only on mobile) */}
-        <div className="md:hidden p-4 space-y-4">
-            <h2 className="text-[#632281] font-black uppercase text-xs tracking-widest mb-4">Pending Interviews</h2>
-            {data.map((user) => (
-                <div key={user.id} className="bg-white rounded-3xl p-5 shadow-sm border border-purple-200">
-                    <div className="flex items-center gap-4 mb-4">
-                        <img src={user.photo} className="w-16 h-16 rounded-2xl object-cover" alt="" />
-                        <div className="flex-1">
-                            <p className="font-black text-gray-800 text-lg leading-none mb-1">{user.name}, {user.age}</p>
-                            <p className="text-xs text-purple-500 font-bold flex items-center gap-1">
-                                <MapPin size={12} /> {user.location}
-                            </p>
-                        </div>
-                        <div className="text-right">
-                            <p className="text-xs font-black text-[#632281] uppercase">{user.time}</p>
-                            <p className="text-[10px] text-gray-400 font-bold">{user.date}</p>
-                        </div>
-                    </div>
-                    <div className="flex gap-2">
-                        <button onClick={() => showNotify('Joining video...')} className="flex-1 flex items-center justify-center gap-2 py-3 bg-green-500 text-white rounded-2xl font-bold text-sm shadow-md">
-                            <Video size={18} /> Join
-                        </button>
-                        <button onClick={() => setSelectedUser(user)} className="flex-[2] bg-[#632281] text-white rounded-2xl font-black text-xs uppercase tracking-widest">
-                            Review Profile
-                        </button>
-                    </div>
-                </div>
-            ))}
-        </div>
-
-        {/* COMPLETE PROFILE MODAL */}
+        {/* LARGE ATTRACTIVE PROFILE MODAL */}
         {selectedUser && (
-          <div className="fixed inset-0 bg-purple-950/60 backdrop-blur-md z-50 flex items-center justify-center p-2 md:p-4">
-            <div className="bg-white w-full max-w-4xl rounded-[2rem] md:rounded-[3.5rem] overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-300 max-h-[90vh] md:max-h-[95vh] flex flex-col md:flex-row">
+          <div className="fixed inset-0 bg-[#1a0b2e]/80 backdrop-blur-xl z-[100] flex items-center justify-center p-4">
+            <div className="bg-white w-full max-w-5xl rounded-[3.5rem] overflow-hidden shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] relative animate-in zoom-in-95 duration-500 max-h-[92vh] flex flex-col md:flex-row border border-white/20">
                   
-                  {/* Left: Image (Adjusted height for mobile) */}
-                  <div className="w-full md:w-1/2 relative h-64 md:h-auto shrink-0">
-                      <img src={selectedUser.photo} className="w-full h-full object-cover" alt="" />
-                      <button onClick={() => {setSelectedUser(null); setShowRejectReason(false)}} className="absolute top-4 left-4 p-2 bg-black/40 backdrop-blur-md rounded-full text-white">
-                          <X size={20} />
-                      </button>
+                  {/* LEFT COLUMN: VISUALS (40% Width) */}
+                  <div className="w-full md:w-[40%] relative bg-gray-900 flex flex-col overflow-hidden">
+                      <img src={selectedUser.photo} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#632281] via-transparent to-black/30" />
+                      
+                      {/* Top Controls */}
+                      <div className="relative z-10 p-8 flex justify-between">
+                        <button onClick={() => setSelectedUser(null)} className="p-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-2xl text-white transition-all">
+                            <X size={24} />
+                        </button>
+                        <div className="flex gap-2">
+                            <button className="p-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-2xl text-white transition-all">
+                                <Instagram size={20} />
+                            </button>
+                        </div>
+                      </div>
+
+                      {/* Floating Identity Info */}
+                      <div className="mt-auto relative z-10 p-10 space-y-4">
+                          <div className="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-[2rem] inline-block">
+                              <p className="text-white/70 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Compatibility</p>
+                              <p className="text-white text-4xl font-black">{selectedUser.compatibility}</p>
+                          </div>
+                          <div>
+                            <h2 className="text-white text-5xl font-black">{selectedUser.name}</h2>
+                            <p className="text-purple-200 text-xl font-bold">{selectedUser.age} Years Old</p>
+                          </div>
+                      </div>
                   </div>
 
-                  {/* Right: Scrollable Details */}
-                  <div className="w-full md:w-1/2 p-6 md:p-12 overflow-y-auto bg-white">
-                      {!showRejectReason ? (
-                        <>
-                          <div className="flex flex-col md:flex-row justify-between items-start gap-2 mb-6">
-                              <div>
-                                  <h2 className="text-3xl md:text-4xl font-black text-gray-800">{selectedUser.name}, {selectedUser.age}</h2>
-                                  <p className="text-purple-600 font-bold flex items-center gap-1 text-sm mt-1">
-                                      <CheckCircle2 size={16} /> Identity Verified
-                                  </p>
-                              </div>
-                              <div className="md:text-right text-gray-400">
-                                  <p className="text-[10px] font-black uppercase tracking-widest">Height</p>
-                                  <p className="text-lg font-bold text-gray-700 flex items-center gap-1 md:justify-end"><Ruler size={14}/> {selectedUser.height}</p>
-                              </div>
-                          </div>
-
-                          {/* Stats Grid */}
-                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-8">
-                              {Object.entries(selectedUser.lifestyle).map(([key, val]) => (
-                                  <div key={key} className="bg-purple-50 border border-purple-100 p-2 rounded-xl text-center">
-                                      <p className="text-[9px] font-black text-purple-400 uppercase">{key}</p>
-                                      <p className="text-xs font-bold text-gray-700 truncate">{val}</p>
+                  {/* RIGHT COLUMN: DETAILS (60% Width) */}
+                  <div className="w-full md:w-[60%] bg-white overflow-y-auto custom-scrollbar flex flex-col">
+                      <div className="p-10 md:p-14 space-y-12">
+                          
+                          {/* Basic Quick Stats */}
+                          <div className="grid grid-cols-3 gap-6">
+                              <div className="flex items-center gap-4">
+                                  <div className="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center text-[#632281]"><Briefcase size={20}/></div>
+                                  <div>
+                                      <p className="text-[10px] font-black text-gray-400 uppercase">Career</p>
+                                      <p className="text-sm font-bold text-gray-800 truncate">{selectedUser.jobTitle}</p>
                                   </div>
-                              ))}
+                              </div>
+                              <div className="flex items-center gap-4">
+                                  <div className="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center text-[#632281]"><Ruler size={20}/></div>
+                                  <div>
+                                      <p className="text-[10px] font-black text-gray-400 uppercase">Height</p>
+                                      <p className="text-sm font-bold text-gray-800">{selectedUser.height}</p>
+                                  </div>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                  <div className="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center text-[#632281]"><MapPin size={20}/></div>
+                                  <div>
+                                      <p className="text-[10px] font-black text-gray-400 uppercase">Distance</p>
+                                      <p className="text-sm font-bold text-gray-800">{selectedUser.distance}</p>
+                                  </div>
+                              </div>
                           </div>
 
-                          <div className="mb-8">
-                              <p className="text-xs font-black text-purple-300 uppercase mb-2 tracking-widest">Bio</p>
-                              <p className="text-gray-600 text-sm leading-relaxed italic">"{selectedUser.bio}"</p>
-                          </div>
+                          {/* My Story Section */}
+                          <section>
+                              <div className="flex items-center gap-3 mb-4">
+                                  <div className="h-px flex-1 bg-gray-100"></div>
+                                  <p className="text-[11px] font-black text-purple-300 uppercase tracking-widest">Profile Story</p>
+                                  <div className="h-px flex-1 bg-gray-100"></div>
+                              </div>
+                              <p className="text-gray-600 text-lg leading-relaxed font-medium italic text-center px-6">
+                                  "{selectedUser.story}"
+                              </p>
+                          </section>
 
-                          <div className="mb-10">
-                              <p className="text-xs font-black text-purple-300 uppercase mb-3 tracking-widest">Interests</p>
+                          {/* Attribute Tags */}
+                          <section className="space-y-4">
+                              <h4 className="text-xs font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                                  <User size={14} className="text-[#632281]" /> Personal Attributes
+                              </h4>
                               <div className="flex flex-wrap gap-2">
-                                  {selectedUser.interests.map(i => (
-                                      <span key={i} className="px-3 py-1 bg-purple-100 text-[#632281] rounded-full text-[10px] font-black uppercase">
-                                          {i}
+                                  {selectedUser.aboutMe.map(tag => (
+                                      <span key={tag} className="px-5 py-2.5 bg-gray-50 text-gray-600 rounded-2xl text-[13px] font-bold border border-gray-100 hover:border-purple-200 transition-colors">
+                                          {tag}
                                       </span>
                                   ))}
                               </div>
-                          </div>
+                          </section>
 
-                          {/* Sticky/Fixed Footer for actions on mobile */}
-                          <div className="flex gap-3 md:gap-4 mt-auto">
-                              <button 
-                                  onClick={() => setShowRejectReason(true)}
-                                  className="flex-1 bg-red-50 text-red-600 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest border border-red-100"
-                              >
-                                  Reject
-                              </button>
-                              <button 
-                                onClick={handleApprove}
-                                className="flex-1 bg-[#632281] text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-purple-200"
-                              >
-                                  Approve
-                              </button>
-                          </div>
-                        </>
-                      ) : (
-                        /* REJECTION VIEW */
-                        <div className="h-full flex flex-col animate-in slide-in-from-right duration-300">
-                           <button onClick={() => setShowRejectReason(false)} className="mb-6 flex items-center gap-2 text-gray-400 font-bold text-sm">
-                               <ChevronRight className="rotate-180" size={16}/> Back
-                           </button>
-                           <h3 className="text-red-600 font-black text-xl mb-4">Reason for Rejection</h3>
-                           <textarea 
-                              value={reason}
-                              onChange={(e) => setReason(e.target.value)}
-                              placeholder="Why is this profile being rejected?"
-                              className="w-full h-32 md:h-48 p-4 border-2 border-purple-50 rounded-2xl focus:border-red-200 outline-none text-sm font-medium"
-                           />
-                           <button 
-                              disabled={!reason}
-                              onClick={handleRejectSubmit}
-                              className="mt-6 w-full bg-red-600 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest flex items-center justify-center gap-2 disabled:opacity-50"
-                           >
-                              <Send size={16}/> Confirm Rejection
-                           </button>
-                        </div>
-                      )}
+                          {/* Interests Section */}
+                          <section className="space-y-4">
+                              <h4 className="text-xs font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                                  <Heart size={14} className="text-[#632281]" /> Interests & Hobbies
+                              </h4>
+                              <div className="flex flex-wrap gap-3">
+                                  {selectedUser.interests.map(i => (
+                                      <span key={i} className="px-6 py-3 bg-purple-50/50 text-[#632281] rounded-2xl text-[13px] font-black flex items-center gap-2 border border-purple-100 shadow-sm">
+                                          <Star size={14} className="text-orange-400" fill="currentColor" /> {i}
+                                      </span>
+                                  ))}
+                              </div>
+                          </section>
+
+                          {/* Gallery Grid */}
+                          <section className="space-y-4">
+                              <div className="flex justify-between items-center">
+                                  <h4 className="text-xs font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                                      <Layers size={14} className="text-[#632281]" /> Gallery Photos
+                                  </h4>
+                                  <button className="text-[#632281] text-[10px] font-black uppercase hover:underline">View All Images</button>
+                              </div>
+                              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                                  {selectedUser.gallery.map((img, idx) => (
+                                      <div key={idx} className="group overflow-hidden rounded-3xl h-32 md:h-40 bg-gray-100 border border-gray-100 shadow-sm">
+                                          <img src={img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 cursor-pointer" alt="" />
+                                      </div>
+                                  ))}
+                              </div>
+                          </section>
+                      </div>
+
+                      {/* Sticky Profile Footer: Close Only */}
+                      <div className="mt-auto p-10 bg-gray-50/50 border-t border-gray-100 flex justify-center">
+                          <button 
+                            onClick={() => setSelectedUser(null)}
+                            className="px-12 py-4 bg-white border border-gray-200 text-gray-500 rounded-2xl font-black uppercase text-xs tracking-[0.2em] shadow-sm hover:bg-gray-100 transition-all active:scale-95"
+                          >
+                              Close Profile Review
+                          </button>
+                      </div>
                   </div>
             </div>
           </div>

@@ -13,6 +13,7 @@ import PlannedDates from './pages/PlannedDates';
 import Restaurants from './pages/Restaurants';
 import Demographics from './pages/Demographics';
 import Interviewers from './pages/Interviewers';
+import Feedback from './pages/Feedback';
 
 //    RBAC 
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -103,6 +104,11 @@ const AppContent = () => {
             <Route path="/interviews" element={
               <ProtectedRoute allowedRoles={['admin', 'psychiatrist']}>
                 <Interviews />
+              </ProtectedRoute>
+            } />
+            <Route path="/feedback" element={
+              <ProtectedRoute allowedRoles={['admin', 'psychiatrist']}>
+                <Feedback/>
               </ProtectedRoute>
             } />
 

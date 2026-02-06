@@ -25,6 +25,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { id: 'interviewer-list', label: 'Interviewers', icon: Users, path: '/interviewer-list', roles: ['admin'] },
     { id: 'dates', label: 'Planned Dates', icon: Clock, path: '/dates', roles: ['admin'] },
     { id: 'restaurants', label: 'Restaurants', icon: Utensils, path: '/restaurants', roles: ['admin'] },
+    { id: 'feedback', label: 'Feedback', icon: Utensils, path: '/feedback', roles: ['admin'] },
   ];
 
   // 3. Filter with Safety Check
@@ -42,7 +43,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
   return (
     <>
-      {/* Mobile Overlay */}
+     
+        {/* Mobile Overlay */}
       {isOpen && (
         <div 
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
@@ -64,7 +66,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               {userRole ? userRole.charAt(0).toUpperCase() : 'W'}
             </div>
             <span className="text-xl font-bold text-[#632281]">
-                {userRole === 'admin' ? 'Admin' : 'Psychiatrist'}
+                {userRole === 'admin' ? 'WingMann' : 'Psychiatrist'}
             </span>
           </div>
           <button onClick={() => setIsOpen(false)} className="lg:hidden text-gray-500 hover:bg-gray-100 p-1 rounded-lg">
