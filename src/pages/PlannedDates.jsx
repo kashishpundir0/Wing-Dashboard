@@ -1,14 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { 
   MapPin, Calendar, Users, ChevronRight, 
-  Filter, Clock, Phone, Mail, X, Globe, AlertCircle, Trash2 
+  Clock, Phone, Mail, X, Globe, AlertCircle, Trash2, CalendarDays 
 } from 'lucide-react';
 
 const PlannedDates = () => {
   const todayStr = new Date().toISOString().split('T')[0];
   const [selectedDate, setSelectedDate] = useState(todayStr);
   const [selectedCity, setSelectedCity] = useState('All');
-  const [activeTab, setActiveTab] = useState('planned'); // New: 'planned' or 'cancelled'
+  const [activeTab, setActiveTab] = useState('planned'); 
   const [viewingDetails, setViewingDetails] = useState(null);
 
   const rawDates = [
@@ -42,7 +42,21 @@ const PlannedDates = () => {
         { name: "Taylor S", phone: "+91 98765 00004", email: "taylor@gmail.com", photo: "T" }
       ]
     },
-    // CANCELLED DATA EXAMPLES
+    { 
+        id: 3, 
+        restaurant: "Olive Bar & Kitchen", 
+        city: "Mumbai",
+        location: "Khar", 
+        time: "08:30 PM", 
+        date: "2025-12-30", // Future date
+        status: "Confirmed", 
+        category: "Dinner",
+        restaurantPhone: "+91 22 4567 8901",
+        participants: [
+          { name: "Mike R", phone: "+91 98765 55555", email: "mike@gmail.com", photo: "M" },
+          { name: "Lisa W", phone: "+91 98765 66666", email: "lisa@yahoo.com", photo: "L" }
+        ]
+      },
     { 
       id: 101, 
       restaurant: "Social Offline", 
@@ -54,90 +68,94 @@ const PlannedDates = () => {
       cancelReason: "User Sarah reported feeling unwell.",
       category: "Drinks",
       restaurantPhone: "+91 22 9999 8888",
-      participants: [
-        { name: "Rahul M", phone: "+91 98765 11111", email: "rahul@mail.com", photo: "R" },
-        { name: "Sneha G", phone: "+91 98765 22222", email: "sneha@mail.com", photo: "S" }
-      ]
-    },
-    { 
-      id: 102, 
-      restaurant: "Farzi Cafe", 
-      city: "Delhi",
-      location: "CP", 
-      time: "01:00 PM", 
-      date: todayStr,
-      status: "Cancelled", 
-      cancelReason: "Restaurant overbooked / Table unavailable.",
-      category: "Lunch",
-      restaurantPhone: "+91 11 0000 1111",
-      participants: [
-        { name: "Amit S", phone: "+91 98765 33333", email: "amit@mail.com", photo: "A" },
-        { name: "Priya B", phone: "+91 98765 44444", email: "priya@mail.com", photo: "P" }
-      ]
-    },
+      participants: [{ name: "Rahul M", photo: "R" }, { name: "Sneha G", photo: "S" }]
+    }
   ];
 
-  const filteredDates = useMemo(() => {
-    return rawDates.filter(d => {
-      const matchDate = d.date === selectedDate;
+  // Helper to format date labels
+  const getDateLabel = (dateStr) => {
+    if (dateStr === todayStr) return "Today";
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    if (dateStr === tomorrow.toISOString().split('T')[0]) return "Tomorrow";
+    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  // Grouping Function: Filters and then groups by date
+  const groupedDates = useMemo(() => {
+    const filtered = rawDates.filter(d => {
       const matchCity = selectedCity === 'All' || d.city === selectedCity;
       const matchStatus = activeTab === 'planned' ? d.status !== 'Cancelled' : d.status === 'Cancelled';
-      return matchDate && matchCity && matchStatus;
+      return matchCity && matchStatus;
     });
-  }, [selectedDate, selectedCity, activeTab]);
+
+    // Grouping by date
+    const groups = filtered.reduce((acc, curr) => {
+      if (!acc[curr.date]) acc[curr.date] = [];
+      acc[curr.date].push(curr);
+      return acc;
+    }, {});
+
+    // Sort dates chronologically
+    return Object.keys(groups).sort().map(date => ({
+      date,
+      label: getDateLabel(date),
+      items: groups[date]
+    }));
+  }, [selectedCity, activeTab]);
 
   const cities = ['All', 'Mumbai', 'Bengaluru', 'Delhi', 'Pune'];
 
   return (
-    <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
+    <div className="max-w-7xl mx-auto space-y-8 bg-gray-50/50 min-h-screen">
       
-      {/* --- Admin Header --- */}
-      <div className="bg-purple-100 p-6 rounded-xl shadow-xl shadow-purple-100/50 border border-purple-50 flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="flex items-center gap-5">
-          <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-lg ${activeTab === 'planned' ? 'bg-[#632281]' : 'bg-rose-500'}`}>
-            {activeTab === 'planned' ? <Calendar size={26} /> : <Trash2 size={26} />}
-          </div>
-          <div>
-            <h1 className="text-xl font-black text-slate-800 tracking-tight">
-              {activeTab === 'planned' ? 'Planned Schedules' : 'Cancelled History'}
-            </h1>
-            <p className="text-slate-500 text-sm font-medium">Viewing {selectedCity} list</p>
-          </div>
+      {/* --- Header Section --- */}
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
+        <div>
+          <h1 className="text-3xl font-black text-gray-900 tracking-tight">Timeline Directory</h1>
+          <p className="text-purple-600 font-bold text-xs uppercase tracking-[0.2em] mt-1">Date Planning & Management</p>
         </div>
 
-        <div className="flex bg-white/50 p-1.5 rounded-2xl border border-purple-100">
-          <button 
-            onClick={() => setActiveTab('planned')}
-            className={`px-6 py-2 rounded-xl text-xs font-black transition-all ${activeTab === 'planned' ? 'bg-[#632281] text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
-          >
-            PLANNED
-          </button>
-          <button 
-            onClick={() => setActiveTab('cancelled')}
-            className={`px-6 py-2 rounded-xl text-xs font-black transition-all ${activeTab === 'cancelled' ? 'bg-rose-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
-          >
-            CANCELLED
-          </button>
-        </div>
+        <div className="flex flex-wrap items-center gap-4 w-full lg:w-auto">
+            {/* Tab Switcher */}
+            <div className="flex bg-white p-1 rounded-2xl shadow-sm border border-purple-100">
+                <button 
+                    onClick={() => setActiveTab('planned')}
+                    className={`px-6 py-2.5 rounded-xl text-xs font-black transition-all ${activeTab === 'planned' ? 'bg-[#632281] text-white shadow-lg' : 'text-gray-400'}`}
+                >
+                    PLANNED
+                </button>
+                <button 
+                    onClick={() => setActiveTab('cancelled')}
+                    className={`px-6 py-2.5 rounded-xl text-xs font-black transition-all ${activeTab === 'cancelled' ? 'bg-rose-500 text-white shadow-lg' : 'text-gray-400'}`}
+                >
+                    CANCELLED
+                </button>
+            </div>
 
-        <input 
-            type="date" 
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="bg-white border-none px-6 py-3 rounded-2xl text-sm font-bold text-[#632281] shadow-sm cursor-pointer"
-        />
+            {/* Jump to Date */}
+            <div className="relative flex items-center bg-white px-4 py-2.5 rounded-2xl border border-purple-100 shadow-sm">
+                <CalendarDays size={16} className="text-purple-400 mr-2" />
+                <input 
+                    type="date" 
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="bg-transparent border-none text-xs font-black text-gray-800 focus:ring-0 cursor-pointer"
+                />
+            </div>
+        </div>
       </div>
 
-      {/* --- City Selector --- */}
+      {/* --- City Filters --- */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
         {cities.map(city => (
           <button
             key={city}
             onClick={() => setSelectedCity(city)}
-            className={`px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+            className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border ${
               selectedCity === city 
-              ? 'bg-[#632281] text-white' 
-              : 'bg-purple-100 text-slate-500 hover:bg-purple-200'
+              ? 'bg-purple-600 border-purple-600 text-white shadow-md' 
+              : 'bg-white border-purple-100 text-gray-400 hover:border-purple-300'
             }`}
           >
             {city}
@@ -145,132 +163,134 @@ const PlannedDates = () => {
         ))}
       </div>
 
-      {/* --- Main Grid --- */}
-      {filteredDates.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredDates.map((d) => (
-            <div 
-              key={d.id} 
-              onClick={() => setViewingDetails(d)}
-              className={`cursor-pointer group p-2 rounded-xl border shadow-sm hover:shadow-2xl transition-all duration-500 bg-purple-100 ${
-                activeTab === 'cancelled' ? 'border-rose-100 hover:shadow-rose-100' : 'border-purple-50 hover:shadow-purple-100'
-              }`}
-            >
-              <div className="p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <div className="flex items-center gap-2 bg-white/80 px-3 py-1 rounded-full">
-                    <Globe size={12} className={activeTab === 'planned' ? 'text-[#632281]' : 'text-rose-500'} />
-                    <span className="text-[10px] font-black uppercase">{d.city}</span>
-                  </div>
-                  <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
-                    d.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-700' : 
-                    d.status === 'Cancelled' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'
-                  }`}>
-                    {d.status}
-                  </span>
-                </div>
+      {/* --- Chronological Content --- */}
+      <div className="space-y-12">
+        {groupedDates.length > 0 ? (
+          groupedDates.map((group) => (
+            <div key={group.date} className="space-y-6">
+              {/* Date Divider */}
+              <div className="flex items-center gap-4">
+                 <div className="h-px flex-1 bg-gradient-to-r from-transparent to-purple-100" />
+                 <h2 className={`text-sm font-black uppercase tracking-[0.3em] ${group.date === todayStr ? 'text-[#632281]' : 'text-gray-400'}`}>
+                    {group.label}
+                 </h2>
+                 <div className="h-px flex-1 bg-gradient-to-l from-transparent to-purple-100" />
+              </div>
 
-                <h3 className="text-xl font-black text-slate-800 mb-1">{d.restaurant}</h3>
-                <div className="flex items-center gap-1.5 text-slate-400 text-xs font-bold mb-6">
-                    <MapPin size={12} className="text-[#632281]" />
-                    {d.location}
-                </div>
-
-                {activeTab === 'cancelled' && (
-                  <div className="mb-6 p-3 bg-rose-50 rounded-xl flex items-start gap-3 border border-rose-100">
-                    <AlertCircle size={16} className="text-rose-500 shrink-0 mt-0.5" />
-                    <p className="text-[11px] font-bold text-rose-600 leading-tight">Reason: {d.cancelReason}</p>
-                  </div>
-                )}
-                
-                <div className="flex items-center justify-between p-4 bg-white/50 rounded-2xl mb-6">
-                  <div className="flex -space-x-3">
-                    {d.participants.map((p, i) => (
-                        <div key={i} className={`w-10 h-10 rounded-xl border-2 border-white flex items-center justify-center text-xs font-black text-white ${i === 0 ? 'bg-[#632281]' : 'bg-purple-300'}`}>
-                            {p.photo}
+              {/* Grid for this specific date */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {group.items.map((d) => (
+                  <div 
+                    key={d.id} 
+                    onClick={() => setViewingDetails(d)}
+                    className={`bg-white group p-6 rounded-[2rem] border transition-all duration-300 hover:shadow-2xl cursor-pointer ${
+                      activeTab === 'cancelled' ? 'border-rose-100 hover:border-rose-300' : 'border-purple-50 hover:border-purple-300'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start mb-6">
+                        <div className="bg-gray-50 px-3 py-1.5 rounded-xl flex items-center gap-2">
+                            <Globe size={12} className="text-purple-400" />
+                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-tighter">{d.city}</span>
                         </div>
-                    ))}
-                  </div>
-                  <ChevronRight className="text-purple-300 group-hover:translate-x-1 transition-transform" />
-                </div>
+                        <span className={`text-[9px] font-black uppercase px-3 py-1 rounded-full ${
+                             d.status === 'Confirmed' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
+                        }`}>{d.status}</span>
+                    </div>
 
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2 text-[#632281] font-black">
-                    <Clock size={16} />
-                    <span className="text-sm">{d.time}</span>
+                    <h3 className="text-xl font-black text-gray-900 group-hover:text-[#632281] transition-colors">{d.restaurant}</h3>
+                    <p className="text-xs font-bold text-gray-400 flex items-center gap-1 mt-1 mb-6">
+                        <MapPin size={12} className="text-purple-300" /> {d.location}
+                    </p>
+
+                    {activeTab === 'cancelled' && (
+                        <div className="p-3 bg-rose-50 border border-rose-100 rounded-xl mb-6">
+                            <p className="text-[10px] font-bold text-rose-600 leading-tight">Reason: {d.cancelReason}</p>
+                        </div>
+                    )}
+
+                    <div className="flex justify-between items-end border-t border-gray-50 pt-6">
+                        <div className="flex -space-x-3">
+                            {d.participants.map((p, i) => (
+                                <div key={i} className={`w-10 h-10 rounded-2xl border-4 border-white flex items-center justify-center text-xs font-black text-white ${i === 0 ? 'bg-[#632281]' : 'bg-purple-300'}`}>
+                                    {p.photo}
+                                </div>
+                            ))}
+                        </div>
+                        <div className="flex flex-col items-end">
+                            <span className="text-[10px] font-black text-gray-300 uppercase leading-none mb-1">Timing</span>
+                            <div className="flex items-center gap-1.5 text-[#632281] font-black">
+                                <Clock size={14} />
+                                <span className="text-sm">{d.time}</span>
+                            </div>
+                        </div>
+                    </div>
                   </div>
-                  <span className="text-[10px] font-black text-slate-300 uppercase">View Details</span>
-                </div>
+                ))}
               </div>
             </div>
-          ))}
-        </div>
-      ) : (
-        <div className="py-20 text-center bg-purple-50 rounded-[3rem] border-2 border-dashed border-purple-200">
-            <p className="text-slate-400 font-bold">No {activeTab} dates found here.</p>
-        </div>
-      )}
+          ))
+        ) : (
+          <div className="py-32 flex flex-col items-center justify-center bg-white rounded-[3rem] border-2 border-dashed border-purple-100 shadow-inner">
+              <div className="w-16 h-16 bg-purple-50 text-purple-200 rounded-full flex items-center justify-center mb-4">
+                  <Calendar size={32} />
+              </div>
+              <p className="text-gray-400 font-black uppercase tracking-widest text-xs">No activity found for this filter</p>
+          </div>
+        )}
+      </div>
 
-      {/* --- Detail Modal (Includes Contact Info) --- */}
+      {/* --- Detail Modal --- */}
       {viewingDetails && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#632281]/20 backdrop-blur-md">
-          <div className="bg-purple-100 w-full max-w-lg rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="p-10">
-              <div className="flex justify-between items-center mb-8">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden">
+            <div className="p-8 md:p-12">
+              <div className="flex justify-between items-center mb-10">
                 <div>
-                  <h2 className="text-2xl font-black text-slate-800">Date Info</h2>
-                  {viewingDetails.status === 'Cancelled' && (
-                    <span className="text-rose-500 text-[10px] font-black uppercase tracking-widest">Cancelled Transaction</span>
-                  )}
+                   <h2 className="text-2xl font-black text-gray-900 leading-tight">Session Intel</h2>
+                   <p className="text-xs font-bold text-purple-400 uppercase tracking-widest">{viewingDetails.date} • {viewingDetails.time}</p>
                 </div>
-                <button onClick={() => setViewingDetails(null)} className="p-3 bg-white rounded-full hover:bg-rose-50 hover:text-rose-500 transition-colors shadow-sm">
+                <button onClick={() => setViewingDetails(null)} className="p-3 bg-gray-50 rounded-2xl hover:bg-rose-50 hover:text-rose-500 transition-all">
                   <X size={20} />
                 </button>
               </div>
 
-              <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2 no-scrollbar">
-                {/* Restaurant */}
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-purple-50">
-                  <p className="text-[10px] font-black text-purple-300 uppercase mb-3">Restaurant</p>
-                  <h4 className="text-lg font-black text-[#632281] mb-2">{viewingDetails.restaurant}</h4>
-                  <div className="flex items-center gap-3 text-sm font-bold text-slate-600 mb-2">
-                    <Phone size={14} className="text-emerald-500" /> {viewingDetails.restaurantPhone}
-                  </div>
-                  <div className="flex items-center gap-3 text-sm font-bold text-slate-600">
-                    <MapPin size={14} className="text-[#632281]" /> {viewingDetails.location}, {viewingDetails.city}
-                  </div>
-                </div>
-
-                {/* Users Contact Details */}
-                <div className="grid grid-cols-1 gap-4">
-                  {viewingDetails.participants.map((u, idx) => (
-                    <div key={idx} className="bg-white p-5 rounded-xl shadow-sm border border-purple-50 flex items-center gap-4">
-                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-lg ${idx === 0 ? 'bg-[#632281]' : 'bg-purple-400'}`}>
-                        {u.photo}
-                      </div>
-                      <div className="flex-1">
-                        <h5 className="font-black text-slate-800 leading-none mb-2">{u.name}</h5>
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500">
-                            <Phone size={12} className="text-[#632281]" /> {u.phone}
-                          </div>
-                          <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500">
-                            <Mail size={12} className="text-purple-400" /> {u.email}
-                          </div>
+              <div className="space-y-6">
+                  {/* Restaurant Info */}
+                  <div className="p-6 bg-purple-50 rounded-[1.5rem] border border-purple-100">
+                    <h4 className="font-black text-[#632281] text-lg leading-none mb-4">{viewingDetails.restaurant}</h4>
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-3 text-xs font-bold text-gray-600">
+                            <Phone size={14} className="text-emerald-500" /> {viewingDetails.restaurantPhone}
                         </div>
-                      </div>
+                        <div className="flex items-center gap-3 text-xs font-bold text-gray-600">
+                            <MapPin size={14} className="text-[#632281]" /> {viewingDetails.location}, {viewingDetails.city}
+                        </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+
+                  {/* Participants */}
+                  <div className="grid grid-cols-1 gap-4">
+                    {viewingDetails.participants.map((u, idx) => (
+                        <div key={idx} className="flex items-center gap-4 p-4 border border-gray-100 rounded-2xl">
+                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white font-black ${idx === 0 ? 'bg-[#632281]' : 'bg-purple-400'}`}>
+                                {u.photo}
+                            </div>
+                            <div>
+                                <h5 className="font-black text-gray-800 text-sm leading-none mb-1">{u.name}</h5>
+                                <p className="text-[10px] font-bold text-gray-400">{u.email || 'Contact Protected'}</p>
+                            </div>
+                        </div>
+                    ))}
+                  </div>
               </div>
 
               <button 
                 onClick={() => setViewingDetails(null)}
-                className={`w-full mt-8 py-5 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl transition-all ${
-                  activeTab === 'planned' ? 'bg-[#632281] shadow-purple-200' : 'bg-rose-500 shadow-rose-200'
-                } text-white`}
+                className={`w-full mt-10 py-4 rounded-2xl font-black uppercase text-xs tracking-[0.2em] shadow-lg transition-all active:scale-95 ${
+                  activeTab === 'planned' ? 'bg-[#632281] text-white shadow-purple-200' : 'bg-rose-500 text-white shadow-rose-200'
+                }`}
               >
-                Close View
+                Dismiss Overview
               </button>
             </div>
           </div>

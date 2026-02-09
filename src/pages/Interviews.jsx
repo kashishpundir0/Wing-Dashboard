@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Video, X, MapPin, CheckCircle2, Ruler, 
   Phone, Star, Calendar, Clock, Briefcase, 
-  Instagram, Heart, User, Layers, AlertCircle
+  Instagram, Heart, User, Layers, AlertCircle, MessageSquare
 } from 'lucide-react';
 
 const Toast = ({ message, type, onClose }) => {
@@ -26,9 +26,26 @@ const Toast = ({ message, type, onClose }) => {
 const Interviews = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [notification, setNotification] = useState(null);
+  
+  // New States for Rejection
+  const [rejectingUser, setRejectingUser] = useState(null);
+  const [rejectionComment, setRejectionComment] = useState('');
 
   const showNotify = (msg, type = 'success') => {
     setNotification({ msg, type });
+  };
+
+  const handleConfirmReject = () => {
+    if (!rejectionComment.trim()) {
+        showNotify('Please provide a reason for rejection', 'error');
+        return;
+    }
+    // Logic to handle rejection (API call, etc.)
+    console.log(`User ${rejectingUser.name} rejected. Reason: ${rejectionComment}`);
+    
+    showNotify(`Rejected ${rejectingUser.name}`, 'error');
+    setRejectingUser(null);
+    setRejectionComment('');
   };
 
   const data = [
@@ -61,11 +78,7 @@ const Interviews = () => {
     <div className="relative p-4 md:p-6 bg-gray-50 min-h-screen">
       {notification && <Toast message={notification.msg} type={notification.type} onClose={() => setNotification(null)} />}
 
-      <div className="  mx-auto">
-        {/* Header Section */}
-      
-
-        {/* MAIN TABLE */}
+      <div className="mx-auto">
         <div className="bg-white rounded-xl shadow-xl shadow-purple-100/50 border border-purple-50 overflow-hidden">
             <table className="w-full text-left border-collapse">
                 <thead className="bg-[#632281]">
@@ -78,20 +91,15 @@ const Interviews = () => {
                 <tbody className="divide-y divide-gray-50">
                     {data.map((user) => (
                     <tr key={user.id} className="group hover:bg-purple-50/30 transition-all duration-300">
-                        <td 
-                            className="px-10 py-6 cursor-pointer"
-                            onClick={() => setSelectedUser(user)}
-                        >
+                        <td className="px-10 py-6 cursor-pointer" onClick={() => setSelectedUser(user)}>
                             <div className="flex items-center gap-5">
                                 <div className="relative">
-                                    <img src={user.photo} className="w-16 h-16 rounded-[1.5rem] object-cover ring-4 ring-purple-50 group-hover:ring-purple-200 transition-all shadow-md" alt="" />
+                                    <img src={user.photo} className="w-16 h-16 rounded-[1.5rem] object-cover ring-4 ring-purple-50 group-hover:ring-purple-200 shadow-md" alt="" />
                                     <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-4 border-white rounded-full shadow-sm"></div>
                                 </div>
                                 <div>
                                     <p className="font-black text-gray-800 text-xl group-hover:text-[#632281] transition-colors">{user.name}, {user.age}</p>
-                                    <p className="text-xs text-gray-400 font-bold flex items-center gap-1 mt-0.5">
-                                        <MapPin size={12} className="text-purple-400" /> {user.location}
-                                    </p>
+                                    <p className="text-xs text-gray-400 font-bold flex items-center gap-1 mt-0.5"><MapPin size={12} className="text-purple-400" /> {user.location}</p>
                                 </div>
                             </div>
                         </td>
@@ -109,9 +117,15 @@ const Interviews = () => {
                                 <button onClick={() => showNotify('Joining Video...')} className="p-3.5 bg-green-500 text-white rounded-2xl hover:bg-green-600 shadow-lg shadow-green-100 transition-transform hover:-translate-y-1">
                                     <Video size={20} />
                                 </button>
-                                <button onClick={() => showNotify('Profile Rejected', 'error')} className="px-6 py-3 rounded-2xl bg-red-50 text-red-600 border border-red-100 font-bold text-sm hover:bg-red-100 transition-all">
+                                
+                                {/* REJECT BUTTON: Now opens rejection modal */}
+                                <button 
+                                    onClick={() => setRejectingUser(user)} 
+                                    className="px-6 py-3 rounded-2xl bg-red-50 text-red-600 border border-red-100 font-bold text-sm hover:bg-red-100 transition-all"
+                                >
                                     Reject
                                 </button>
+                                
                                 <button onClick={() => showNotify('Profile Approved')} className="px-6 py-3 rounded-2xl bg-[#632281] text-white font-bold text-sm hover:bg-purple-900 shadow-lg shadow-purple-100 transition-all hover:-translate-y-1">
                                     Approve
                                 </button>
@@ -123,8 +137,53 @@ const Interviews = () => {
             </table>
         </div>
 
-        {/* LARGE ATTRACTIVE PROFILE MODAL */}
-        {selectedUser && (
+        {/* REJECTION COMMENT MODAL */}
+        {rejectingUser && (
+            <div className="fixed inset-0 bg-[#1a0b2e]/60 backdrop-blur-md z-[120] flex items-center justify-center p-4">
+                <div className="bg-white w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl border border-purple-100 animate-in fade-in zoom-in-95 duration-300">
+                    <div className="flex justify-between items-center mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="p-3 bg-red-50 text-red-500 rounded-2xl">
+                                <MessageSquare size={24} />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-black text-gray-900">Rejection Reason</h3>
+                                <p className="text-xs text-gray-400 font-bold">Candidate: {rejectingUser.name}</p>
+                            </div>
+                        </div>
+                        <button onClick={() => setRejectingUser(null)} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+                            <X size={20} className="text-gray-400" />
+                        </button>
+                    </div>
+
+                    <textarea 
+                        autoFocus
+                        value={rejectionComment}
+                        onChange={(e) => setRejectionComment(e.target.value)}
+                        placeholder="Please provide details on why this profile was rejected..."
+                        className="w-full h-40 bg-gray-50 border border-gray-100 rounded-[1.5rem] p-5 text-gray-700 font-medium placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-100 focus:bg-white transition-all resize-none"
+                    />
+
+                    <div className="grid grid-cols-2 gap-4 mt-6">
+                        <button 
+                            onClick={() => setRejectingUser(null)}
+                            className="py-4 rounded-2xl bg-gray-50 text-gray-500 font-black text-xs uppercase tracking-widest hover:bg-gray-100 transition-all"
+                        >
+                            Cancel
+                        </button>
+                        <button 
+                            onClick={handleConfirmReject}
+                            className="py-4 rounded-2xl bg-red-500 text-white font-black text-xs uppercase tracking-widest hover:bg-red-600 shadow-lg shadow-red-100 transition-all active:scale-95"
+                        >
+                            Confirm Rejection
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
+
+        {/* PRE-EXISTING PROFILE MODAL CODE ... */}
+         {selectedUser && (
           <div className="fixed inset-0 bg-[#1a0b2e]/80 backdrop-blur-xl z-[100] flex items-center justify-center p-4">
             <div className="bg-white w-full max-w-5xl rounded-[3.5rem] overflow-hidden shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] relative animate-in zoom-in-95 duration-500 max-h-[92vh] flex flex-col md:flex-row border border-white/20">
                   
