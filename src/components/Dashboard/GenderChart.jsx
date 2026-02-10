@@ -1,73 +1,81 @@
 import React from 'react';
-import { MapPin, Globe } from 'lucide-react';
+import { MapPin, Globe, Users2 } from 'lucide-react';
 
 const GenderChart = ({ maleCount, femaleCount, regionalBreakdown = [] }) => {
   const total = maleCount + femaleCount;
   const malePercent = Math.round((maleCount / total) * 100);
   const femalePercent = Math.round((femaleCount / total) * 100);
+  const ratio = (maleCount / femaleCount).toFixed(1);
 
   return (
-    /* Removed mx-auto, set to w-full */
-    <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-4 items-start py-2">
-      
-      {/* LEFT SIDE: Gender Section */}
-      <div className="bg-white rounded-[1.5rem] border border-purple-100 shadow-lg p-5 flex flex-col justify-between">
-        <div className="flex justify-between items-center mb-4">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      {/* GENDER SECTION */}
+      <div className="lg:col-span-8 bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+        <div className="flex justify-between items-center mb-10">
           <div>
-            <h3 className="text-base font-black text-gray-900 leading-tight">Gender Demographics</h3>
-            <p className="text-[11px] text-gray-400 font-bold uppercase tracking-tighter">Global Distribution</p>
+            <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter">Gender Distribution</h3>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Global User Ratio</p>
           </div>
-          <div className="bg-purple-50 p-2 rounded-xl text-[#632281]"><Globe size={16} /></div>
+          <div className="flex items-center gap-6">
+            <div className="text-right">
+              <p className="text-[10px] font-black text-slate-400 uppercase">Ratio (M:F)</p>
+              <p className="text-2xl font-black text-slate-900">{ratio} : 1</p>
+            </div>
+            <div className="h-10 w-[1px] bg-slate-200 mx-2" />
+            <div className="bg-slate-900 p-2.5 rounded-xl text-white shadow-lg"><Globe size={18} /></div>
+          </div>
         </div>
 
-        <div className="flex justify-around items-end h-40 px-2">
-          {/* Male */}
-          <div className="flex flex-col items-center gap-2 w-full">
-            <div className="relative w-10 bg-gray-50 rounded-xl h-28 overflow-hidden border border-gray-100 flex flex-col justify-end">
-              <div className="w-full bg-[#632281] rounded-t-lg" style={{ height: `${malePercent}%` }} />
-              <span className="absolute inset-x-0 top-1 text-[9px] font-black text-gray-400 text-center">{malePercent}%</span>
-            </div>
-            <div className="text-center">
-              <p className="text-[9px] font-black text-gray-400 uppercase">Male</p>
-              <p className="text-sm font-black text-gray-800">{maleCount.toLocaleString()}</p>
-            </div>
+        <div className="flex justify-around items-end h-56 px-4">
+          {/* Male Bar */}
+          <div className="flex flex-col items-center gap-4 w-full group max-w-[120px]">
+             <div className="relative w-full bg-slate-50 h-48 rounded-xl border border-slate-100 flex flex-col justify-end overflow-hidden">
+                <div className="w-full bg-slate-900 transition-all duration-700" style={{ height: `${malePercent}%` }} />
+                <span className="absolute inset-x-0 bottom-4 text-center text-[10px] font-black text-white uppercase tracking-widest">Male</span>
+             </div>
+             <p className="text-xl font-black text-slate-900">{malePercent}%</p>
           </div>
-          {/* Female */}
-          <div className="flex flex-col items-center gap-2 w-full">
-            <div className="relative w-10 bg-gray-50 rounded-xl h-28 overflow-hidden border border-gray-100 flex flex-col justify-end">
-              <div className="w-full bg-purple-300 rounded-t-lg" style={{ height: `${femalePercent}%` }} />
-              <span className="absolute inset-x-0 top-1 text-[9px] font-black text-gray-400 text-center">{femalePercent}%</span>
-            </div>
-            <div className="text-center">
-              <p className="text-[9px] font-black text-gray-400 uppercase">Female</p>
-              <p className="text-sm font-black text-gray-800">{femaleCount.toLocaleString()}</p>
-            </div>
+
+          {/* Female Bar */}
+          <div className="flex flex-col items-center gap-4 w-full group max-w-[120px]">
+             <div className="relative w-full bg-slate-50 h-48 rounded-xl border border-slate-100 flex flex-col justify-end overflow-hidden">
+                <div className="w-full bg-slate-300 transition-all duration-700" style={{ height: `${femalePercent}%` }} />
+                <span className="absolute inset-x-0 bottom-4 text-center text-[10px] font-black text-slate-600 uppercase tracking-widest">Female</span>
+             </div>
+             <p className="text-xl font-black text-slate-900">{femalePercent}%</p>
           </div>
-        </div>
-        <div className="mt-4 pt-3 border-t border-gray-50 flex justify-between items-center">
-            <span className="text-[10px] font-bold text-gray-400 uppercase">Active Users</span>
-            <span className="text-lg font-black text-[#632281]">{total.toLocaleString()}</span>
         </div>
       </div>
 
-      {/* RIGHT SIDE: Regional */}
-      <div className="bg-[#632281] rounded-[1.5rem] p-5 shadow-lg flex flex-col h-full">
-        <h4 className="text-[10px] font-black text-purple-200 uppercase tracking-widest mb-3 flex items-center gap-2"><MapPin size={12} /> Regional</h4>
-        <div className="space-y-2 overflow-y-auto max-h-[180px] custom-scrollbar">
+      {/* REGIONAL SECTION (Refined) */}
+      <div className="lg:col-span-4 bg-white border border-slate-200 rounded-2xl overflow-hidden flex flex-col shadow-sm">
+        <div className="bg-slate-900 p-5 flex justify-between items-center">
+            <h4 className="text-[11px] font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
+                <MapPin size={14} /> Regional Reach
+            </h4>
+            <span className="text-[10px] font-bold text-slate-400 uppercase">Top 5</span>
+        </div>
+
+        <div className="flex-1 p-6 space-y-5 overflow-y-auto max-h-[320px] custom-scrollbar">
           {regionalBreakdown.map((item, idx) => (
-            <div key={idx} className="bg-white/5 border border-white/10 p-3 rounded-xl flex justify-between items-center">
+            <div key={idx} className="flex justify-between items-center">
               <div>
-                <p className="text-white font-black text-xs">{item.location}</p>
-                <div className="flex gap-3 mt-1">
-                  <div className="flex flex-col"><span className="text-[8px] font-bold text-purple-300 uppercase">M</span><span className="text-white text-[10px] font-bold">{item.male}</span></div>
-                  <div className="flex flex-col"><span className="text-[8px] font-bold text-purple-300 uppercase">F</span><span className="text-white text-[10px] font-bold">{item.female}</span></div>
+                <p className="text-slate-900 font-bold text-sm uppercase tracking-tight">{item.location}</p>
+                <p className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">
+                  M: {item.male} • F: {item.female}
+                </p>
+              </div>
+              <div className="flex flex-col items-end">
+                <span className="text-sm font-black text-slate-900">
+                    {Math.round(((item.male + item.female) / total) * 100)}%
+                </span>
+                <div className="w-16 h-1 bg-slate-100 rounded-full mt-1 overflow-hidden">
+                    <div className="h-full bg-slate-900" style={{ width: `${Math.round(((item.male + item.female) / total) * 100)}%` }} />
                 </div>
               </div>
-              <span className="text-[9px] font-black text-purple-900 bg-purple-200 px-2 py-1 rounded-md">{Math.round(((item.male + item.female) / total) * 100)}%</span>
             </div>
           ))}
         </div>
-        <button className="w-full mt-3 py-2 rounded-lg border border-white/10 text-white text-[10px] font-black uppercase tracking-tighter">View All</button>
       </div>
     </div>
   );

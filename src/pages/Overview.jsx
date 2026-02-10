@@ -1,227 +1,155 @@
 import React from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, LabelList, AreaChart, Area
+  PieChart, Pie, Cell, AreaChart, Area, LabelList
 } from 'recharts';
-import { ArrowUpRight, Users, Calendar, BookOpen, MousePointer2 } from 'lucide-react';
+import { ArrowUpRight, Users, Calendar, MousePointer2, ClipboardCheck, CheckCircle, XCircle } from 'lucide-react';
 
 const Overview = () => {
-  const PURPLE_DEEP = "#632281";
-  const PURPLE_MID = "#A855F7";
-  const PURPLE_LIGHT = "#C084FC";
-  const PURPLE_SOFT = "#E9D5FF";
+  const THEME_DARK = "#1F1F2E";
+  const THEME_BG = "#F5F6FA";
 
-  // Data sets
+  // Data Set 1: User Acquisition Journey
   const acquisitionData = [
-    { name: 'Visits', value: 12450, color: PURPLE_DEEP },
-    { name: 'Signups', value: 3200, color: PURPLE_MID },
-    { name: 'Quizzes', value: 1850, color: PURPLE_LIGHT },
-    { name: 'Dates', value: 2050, color: PURPLE_SOFT },
+    { name: 'Visits', value: 12450, color: THEME_DARK },
+    { name: 'Signups', value: 3200, color: '#4F46E5' },
+    { name: 'Interviews', value: 450, color: '#94A3B8' },
+    { name: 'Dates', value: 2050, color: '#CBD5E1' },
   ];
 
-  const interviewData = [
+  // Data Set 2: The Interview Pipeline (Workflow progression)
+  const pipelineData = [
     { stage: 'Scheduled', count: 450 },
     { stage: 'Completed', count: 380 },
     { stage: 'Accepted', count: 120 },
     { stage: 'Rejected', count: 260 },
   ];
 
+  // Data Set 3: Success vs Rejection
   const outcomeData = [
-    { name: 'Accepted', value: 120, fill: PURPLE_DEEP },
-    { name: 'Rejected', value: 260, fill: PURPLE_SOFT },
+    { name: 'Accepted', value: 120, fill: THEME_DARK },
+    { name: 'Rejected', value: 260, fill: '#E2E8F0' },
   ];
 
-  const quizActivityData = [
-    { day: 'Mon', completions: 120 },
-    { day: 'Tue', completions: 300 },
-    { day: 'Wed', completions: 250 },
-    { day: 'Thu', completions: 420 },
-    { day: 'Fri', completions: 380 },
-    { day: 'Sat', completions: 200 },
-    { day: 'Sun', completions: 180 },
-  ];
-
-  // Helper Component for KPI Cards
-  const StatCard = ({ title, value, icon: Icon, trend, subtext }) => (
-    <div className="bg-white p-5 rounded-2xl border border-purple-100 shadow-sm hover:shadow-md transition-shadow">
+  const StatCard = ({ title, value, icon: Icon, trend, subtext, isHero }) => (
+    <div className={`p-8 rounded-[2.5rem] transition-all flex flex-col justify-between h-56 ${
+      isHero 
+      ? 'bg-[#1F1F2E] text-white shadow-2xl shadow-[#1F1F2E]/30' 
+      : 'bg-white text-[#1F1F2E] border border-slate-100 shadow-sm'
+    }`}>
       <div className="flex justify-between items-start">
-        <div className="p-2 bg-purple-50 rounded-lg">
-          <Icon size={20} className="text-[#632281]" />
+        <div className={`p-3 rounded-2xl ${isHero ? 'bg-white/10' : 'bg-[#F5F6FA]'}`}>
+          <Icon size={22} className={isHero ? 'text-white' : 'text-[#1F1F2E]'} />
         </div>
-        <span className="flex items-center text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">
-          <ArrowUpRight size={12} /> {trend}
+        <span className={`flex items-center text-[11px] font-bold px-3 py-1.5 rounded-full ${
+          isHero ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-50 text-emerald-600'
+        }`}>
+          <ArrowUpRight size={14} className="mr-1" /> {trend}
         </span>
       </div>
-      <div className="mt-4">
-        <h3 className="text-gray-500 text-xs font-bold uppercase tracking-wider">{title}</h3>
-        <p className="text-2xl font-black text-gray-900 mt-1">{value}</p>
-        <p className="text-[10px] text-gray-400 mt-1 font-medium">{subtext}</p>
+      <div>
+        <h3 className={`text-[11px] font-bold uppercase tracking-[0.2em] mb-1 opacity-60`}>{title}</h3>
+        <p className="text-4xl font-black tracking-tight">{value}</p>
+        <p className={`text-[10px] mt-2 font-bold uppercase tracking-widest opacity-40`}>{subtext}</p>
       </div>
     </div>
   );
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 bg-gray-50/50 min-h-screen font-sans">
+    <div className="min-h-screen bg-[#F5F6FA] w-full p-6 md:p-10 space-y-10 overflow-x-hidden">
       
-      {/* 1. Header & Quick Stats */}
-      <div className="flex flex-col gap-6">
-        <div>
-          <h1 className="text-2xl font-black text-gray-900 tracking-tight">Executive Dashboard</h1>
-          <p className="text-purple-600 font-bold text-xs uppercase tracking-[0.2em]">Real-time Platform Performance</p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard title="Total Traffic" value="12,450" icon={MousePointer2} trend="14%" subtext="Visits this month" />
-          <StatCard title="New Signups" value="3,200" icon={Users} trend="8%" subtext="25.7% Conversion rate" />
-          <StatCard title="Quiz Activity" value="1,850" icon={BookOpen} trend="22%" subtext="82% Avg. score" />
-          <StatCard title="Dates Planned" value="2,050" icon={Calendar} trend="18%" subtext="Success milestone" />
-        </div>
+      {/* 1. KPI Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <StatCard title="Total Traffic" value="12,450" icon={MousePointer2} trend="14%" subtext="Visits this month" isHero={true} />
+        <StatCard title="New Signups" value="3,200" icon={Users} trend="8%" subtext="User growth" />
+        <StatCard title="Scheduled Interviews" value="450" icon={ClipboardCheck} trend="12%" subtext="Pending sessions" />
+        <StatCard title="Dates Planned" value="2,050" icon={Calendar} trend="18%" subtext="Matchmaking success" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* 2. Acquisition Breakdown (Takes 2 columns) */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-purple-100 shadow-sm">
-  <div className="flex justify-between items-center mb-8">
-    <div>
-      <h3 className="text-lg font-black text-gray-800 tracking-tight">User Acquisition Funnel</h3>
-      <p className="text-sm text-gray-400 font-medium">Stage-by-stage user drop-off</p>
-    </div>
-    <div className="text-right">
-      <span className="text-xs font-bold text-purple-600 bg-purple-50 px-3 py-1 rounded-full">Primary Metric</span>
-    </div>
-  </div>
-  
-  <div className="h-[300px] w-full">
-    <ResponsiveContainer width="100%" height="100%">
-      {/* Removed layout="vertical" to make it stand upright */}
-      <BarChart data={acquisitionData} margin={{ top: 25, right: 0, left: 0, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-        
-        {/* XAxis now shows the names */}
-        <XAxis 
-          dataKey="name" 
-          axisLine={false} 
-          tickLine={false} 
-          tick={{ fontWeight: 'bold', fontSize: 12, fill: '#64748b' }} 
-        />
-        
-        {/* YAxis is hidden to keep the clean "funnel" look */}
-        <YAxis hide />
-        
-        <Tooltip 
-          cursor={{ fill: '#F3E8FF', opacity: 0.4 }} 
-          contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} 
-        />
-        
-        <Bar dataKey="value" radius={[8, 8, 0, 0]} barSize={60}>
-          {acquisitionData.map((entry, index) => (
-            <Cell key={index} fill={entry.color} />
-          ))}
-          {/* Added LabelList so numbers are visible at a glance */}
-          <LabelList 
-            dataKey="value" 
-            position="top" 
-            style={{ fill: '#632281', fontSize: '12px', fontWeight: '900' }} 
-          />
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
-  </div>
-</div>
-
-        {/* 3. Acceptance Gauge */}
-        <div className="bg-white p-6 rounded-2xl border border-purple-100 shadow-sm flex flex-col justify-between">
-          <div>
-            <h3 className="text-lg font-black text-gray-800">Interview Success</h3>
-            <p className="text-sm text-gray-400 font-medium">Acceptance vs Rejection</p>
+        {/* 2. User Acquisition Funnel */}
+        <div className="lg:col-span-2 bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100">
+          <div className="flex justify-between items-center mb-10">
+            <div>
+              <h3 className="text-xl font-bold text-[#1F1F2E] tracking-tight">Acquisition Funnel</h3>
+              <p className="text-sm text-slate-400 font-medium mt-1">Stage-by-stage progression</p>
+            </div>
           </div>
-          
-          <div className="h-52 w-full relative">
+          <div className="h-[320px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={acquisitionData} margin={{ top: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontWeight: '700', fontSize: 12, fill: '#94a3b8' }} dy={10} />
+                <YAxis hide />
+                <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }} />
+                <Bar dataKey="value" radius={[12, 12, 0, 0]} barSize={55}>
+                  {acquisitionData.map((entry, index) => <Cell key={index} fill={entry.color} />)}
+                  <LabelList dataKey="value" position="top" style={{ fill: THEME_DARK, fontSize: '12px', fontWeight: '900' }} offset={15} />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* 3. Interview Success Ring */}
+        <div className="bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100 flex flex-col justify-between">
+          <div>
+            <h3 className="text-xl font-bold text-[#1F1F2E] tracking-tight">Interview Success</h3>
+            <p className="text-sm text-slate-400 font-medium mt-1">Acceptance Ratio</p>
+          </div>
+          <div className="h-60 w-full relative flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie
-                  data={outcomeData}
-                  innerRadius={65}
-                  outerRadius={85}
-                  startAngle={180}
-                  endAngle={0}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {outcomeData.map((entry, index) => <Cell key={index} fill={entry.fill} cornerRadius={4} />)}
+                <Pie data={outcomeData} innerRadius={75} outerRadius={95} startAngle={180} endAngle={0} paddingAngle={8} dataKey="value" stroke="none">
+                  {outcomeData.map((entry, index) => <Cell key={index} fill={entry.fill} cornerRadius={10} />)}
                 </Pie>
-                <Tooltip />
               </PieChart>
             </ResponsiveContainer>
-            <div className="absolute inset-0 flex flex-col items-center justify-center pt-10">
-              <span className="text-3xl font-black text-gray-800">31.5%</span>
-              <span className="text-[10px] font-bold text-gray-400 uppercase">Approval Rate</span>
+            <div className="absolute inset-0 flex flex-col items-center justify-center pt-12">
+              <span className="text-4xl font-black text-[#1F1F2E]">31.5%</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Rate</span>
             </div>
           </div>
-
-          <div className="space-y-2">
-             <div className="flex justify-between items-center p-2 bg-gray-50 rounded-lg">
-                <span className="flex items-center gap-2 text-xs font-bold text-gray-600">
-                  <div className="w-2 h-2 rounded-full bg-[#632281]" /> Accepted
+          <div className="space-y-3">
+             <div className="flex justify-between items-center p-4 bg-[#F5F6FA] rounded-2xl">
+                <span className="flex items-center gap-3 text-xs font-bold text-slate-500">
+                  <CheckCircle size={16} className="text-[#1F1F2E]" /> Accepted
                 </span>
-                <span className="text-xs font-black">120</span>
+                <span className="text-sm font-bold text-[#1F1F2E]">120</span>
              </div>
-             <div className="flex justify-between items-center p-2 bg-gray-50 rounded-lg">
-                <span className="flex items-center gap-2 text-xs font-bold text-gray-600">
-                  <div className="w-2 h-2 rounded-full bg-[#E9D5FF]" /> Rejected
+             <div className="flex justify-between items-center p-4 bg-[#F5F6FA] rounded-2xl opacity-50">
+                <span className="flex items-center gap-3 text-xs font-bold text-slate-500">
+                  <XCircle size={16} className="text-slate-400" /> Rejected
                 </span>
-                <span className="text-xs font-black text-gray-400">260</span>
+                <span className="text-sm font-bold text-slate-400">260</span>
              </div>
           </div>
         </div>
 
-        {/* 4. Interview Pipeline (Trend) */}
-        <div className="bg-white p-6 rounded-2xl border border-purple-100 shadow-sm">
-          <h3 className="text-lg font-black text-gray-800 mb-6">Pipeline Volume</h3>
-          <div className="h-[250px]">
+        {/* 4. The Interview Pipeline Trend (Bottom Wide Chart) */}
+        <div className="lg:col-span-3 bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100">
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h3 className="text-xl font-bold text-[#1F1F2E] tracking-tight">Pipeline Volume</h3>
+              <p className="text-sm text-slate-400 font-medium mt-1">Workflow progression analytics</p>
+            </div>
+          </div>
+          <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={interviewData}>
+              <AreaChart data={pipelineData}>
                 <defs>
-                  <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={PURPLE_MID} stopOpacity={0.2}/>
-                    <stop offset="95%" stopColor={PURPLE_MID} stopOpacity={0}/>
+                  <linearGradient id="colorDark" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={THEME_DARK} stopOpacity={0.1}/>
+                    <stop offset="95%" stopColor={THEME_DARK} stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                <XAxis dataKey="stage" axisLine={false} tickLine={false} tick={{fontSize: 11, fontWeight: 'bold', fill: '#94A3B8'}} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="stage" axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: '700', fill: '#94a3b8'}} dy={10} />
                 <YAxis hide />
-                <Tooltip />
-                <Area type="monotone" dataKey="count" stroke={PURPLE_MID} strokeWidth={3} fillOpacity={1} fill="url(#colorCount)" />
+                <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                <Area type="monotone" dataKey="count" stroke={THEME_DARK} strokeWidth={4} fillOpacity={1} fill="url(#colorDark)" />
               </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* 5. Weekly Activity (Knowledge Base) */}
-        <div className="lg:col-span-2 bg-[#632281] p-6 rounded-2xl shadow-xl shadow-purple-900/20 text-white">
-          <div className="flex justify-between items-start mb-6">
-            <div>
-              <h3 className="text-lg font-black">Knowledge Base Activity</h3>
-              <p className="text-purple-300 text-sm font-medium">Quiz completions over the last 7 days</p>
-            </div>
-            <div className="bg-white/10 px-4 py-2 rounded-xl border border-white/10">
-               <p className="text-[10px] uppercase font-bold text-purple-200">Total Weekly</p>
-               <p className="text-xl font-black">1,850</p>
-            </div>
-          </div>
-          
-          <div className="h-[200px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={quizActivityData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
-                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: 'bold', fill: '#E9D5FF'}} />
-                <Tooltip 
-                  cursor={{fill: 'rgba(255,255,255,0.05)'}}
-                  contentStyle={{backgroundColor: '#FFF', borderRadius: '8px', color: '#000'}}
-                />
-                <Bar dataKey="completions" fill="#C084FC" radius={[6, 6, 0, 0]} barSize={35} />
-              </BarChart>
             </ResponsiveContainer>
           </div>
         </div>

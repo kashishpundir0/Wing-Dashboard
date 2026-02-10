@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, UserPlus, ArrowLeft } from 'lucide-react';
-import { loginUser, registerAdmin, forgotPassword } from '../api/loginApi';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, UserPlus, Shield } from 'lucide-react';
+import { loginUser } from '../api/loginApi';
 import LogoImg from '../assets/logo.png';
 
 const Login = () => {
@@ -10,165 +10,146 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [message, setMessage] = useState(''); // Success message
+  const [message, setMessage] = useState('');
 
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
 
- const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
       if (mode === 'register') {
-        // registration logic...
+        // registration logic here if needed
       } else {
         const data = await loginUser(formData);
         
-        // 1. Save Token
         localStorage.setItem('token', data.token);
-        
-        // 2. Save User Role (Ensure your API returns 'role' or set it based on email)
-        // If your API returns data.role, use that. Otherwise, for testing:
         const role = data.role || 'admin'; 
         localStorage.setItem('userRole', role);
         
         navigate('/overview');
       }
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Authentication failed');
     } finally {
       setLoading(false);
     }
   };
-  // Helper to change modes
-  const switchMode = (newMode) => {
-    setMode(newMode);
-    setError('');
-    setMessage('');
-  };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-purple-100 p-4">
-      {/* Background blobs... */}
+    <div className="min-h-screen w-full flex items-center justify-center bg-slate-50 p-6 font-sans">
+      
+      {/* Container Card */}
+      <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-[0_32px_64px_-15px_rgba(0,0,0,0.1)] p-10 md:p-12 border border-slate-100 relative overflow-hidden">
+        
+        {/* Subtle Decorative Element */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-full -mr-16 -mt-16 opacity-50"></div>
 
-      <div className="bg-purple-300 w-full max-w-md rounded-[3rem] shadow-2xl p-10 md:p-12 z-10 border border-gray-50">
-        <div className="flex flex-col items-center mb-10">
-          <div className="w-16 h-16 bg-[#632281] rounded-3xl flex items-center justify-center text-white font-black text-3xl mb-4">
+        <div className="flex flex-col items-center mb-12 relative z-10">
+          {/* Logo Box - Professional Black */}
+          <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center p-2.5 shadow-xl mb-6">
             <img
               src={LogoImg}
-              alt="WingMann Logo"
-              className="w-full h-full object-contain"
+              alt="Logo"
+              className="w-full h-full object-contain invert brightness-0"
             />
           </div>
-          <h1 className="text-3xl font-black text-gray-800">
-            {mode === 'register' ? "Admin Registration" : mode === 'forgot' ? "Reset Password" : "Admin Portal"}
+          <h1 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic">
+            {mode === 'register' ? "Register" : mode === 'forgot' ? "Reset" : "Admin Portal"}
           </h1>
-          <p className="text-gray-400 font-medium mt-1">
-            {mode === 'register' ? "Create a new admin account" :
-              mode === 'forgot' ? "Enter email to receive reset link" :
-                "Sign in to DateApp Admin"}
+          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-2 text-center">
+            {mode === 'register' ? "Create account" :
+              mode === 'forgot' ? "Enter email for link" :
+                "Secure Identity Management"}
           </p>
         </div>
 
-        {/* Status Alerts */}
-        {error && <div className="mb-6 p-3 bg-red-100 border border-red-200 text-red-600 text-sm rounded-xl text-center font-bold">{error}</div>}
-        {message && <div className="mb-6 p-3 bg-green-100 border border-green-200 text-green-600 text-sm rounded-xl text-center font-bold">{message}</div>}
+        {/* Status Alerts - Clean Minimalist Style */}
+        {error && (
+          <div className="mb-8 p-4 bg-rose-50 border border-rose-100 text-rose-600 text-xs rounded-xl text-center font-bold uppercase tracking-wider">
+            {error}
+          </div>
+        )}
+        {message && (
+          <div className="mb-8 p-4 bg-emerald-50 border border-emerald-100 text-emerald-600 text-xs rounded-xl text-center font-bold uppercase tracking-wider">
+            {message}
+          </div>
+        )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Email Field - Always Visible */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-400 uppercase ml-1 tracking-wider">Email Address</label>
+        <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
+          {/* Email Field */}
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-[0.2em]">Email Identifier</label>
             <div className="relative">
-              <Mail className="absolute left-4 top-3.5 text-gray-400" size={20} />
+              <Mail className="absolute left-4 top-3.5 text-slate-400" size={18} />
               <input
                 type="email"
                 required
-                placeholder="admin@dateapp.com"
-                className="w-full pl-12 pr-4 py-3.5 rounded-2xl border border-gray-100 bg-gray-50 focus:bg-white focus:border-[#632281] outline-none transition-all font-medium text-gray-700"
+                placeholder="admin@wingmann.com"
+                className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-slate-100 bg-slate-50 focus:bg-white focus:border-black outline-none transition-all font-semibold text-slate-700 placeholder:text-slate-300"
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 disabled={loading}
               />
             </div>
           </div>
 
-          {/* Password Field - Hidden in Forgot Mode */}
+          {/* Password Field */}
           {mode !== 'forgot' && (
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <label className="text-xs font-bold text-gray-400 uppercase ml-1 tracking-wider">Password</label>
-                {/* {mode === 'login' && (
-                  <button
-                    type="button"
-                    onClick={() => switchMode('forgot')}
-                    className="text-xs font-bold text-[#632281] hover:underline"
-                  >
-                    Forgot?
-                  </button>
-                )} */}
+                <label className="text-[10px] font-black text-slate-400 uppercase ml-1 tracking-[0.2em]">Access Key</label>
               </div>
               <div className="relative">
-                <Lock className="absolute left-4 top-3.5 text-gray-400" size={20} />
+                <Lock className="absolute left-4 top-3.5 text-slate-400" size={18} />
                 <input
                   type={showPassword ? "text" : "password"}
                   required
                   placeholder="••••••••"
-                  className="w-full pl-12 pr-12 py-3.5 rounded-2xl border border-gray-100 bg-gray-50 focus:bg-white focus:border-[#632281] outline-none transition-all font-medium text-gray-700"
+                  className="w-full pl-12 pr-12 py-3.5 rounded-xl border border-slate-100 bg-slate-50 focus:bg-white focus:border-black outline-none transition-all font-semibold text-slate-700 placeholder:text-slate-300"
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   disabled={loading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-3.5 text-gray-400 hover:text-gray-600"
+                  className="absolute right-4 top-3.5 text-slate-400 hover:text-black transition-colors"
                 >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
           )}
 
+          {/* Action Button */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#632281] text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 shadow-xl hover:bg-[#4d1a64] active:scale-[0.98] transition-all disabled:bg-purple-400"
+            className="w-full bg-black text-white py-4.5 rounded-xl font-bold text-sm uppercase tracking-[0.2em] flex items-center justify-center gap-3 shadow-xl hover:bg-slate-800 active:scale-[0.98] transition-all disabled:bg-slate-200 mt-4"
           >
             {loading ? (
-              <Loader2 className="animate-spin" size={24} />
+              <Loader2 className="animate-spin" size={20} />
             ) : (
               <>
                 <span>
-                  {mode === 'register' ? "Register Account" :
-                    mode === 'forgot' ? "Send Reset Link" : "Sign In to Dashboard"}
+                  {mode === 'register' ? "Create Account" :
+                    mode === 'forgot' ? "Reset Password" : "Sign In"}
                 </span>
-                {mode === 'register' ? <UserPlus size={20} /> : <ArrowRight size={20} />}
+                <ArrowRight size={18} />
               </>
             )}
           </button>
         </form>
 
-        {/* <div className="mt-8 text-center">
-          {mode === 'forgot' ? (
-            <button
-              type="button"
-              onClick={() => switchMode('login')}
-              className="text-sm font-bold text-[#632281] flex items-center justify-center gap-2 mx-auto hover:underline"
-            >
-              <ArrowLeft size={16} /> Back to Login
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => switchMode(mode === 'login' ? 'register' : 'login')}
-              className="text-sm font-bold text-[#632281] hover:underline"
-            >
-              {mode === 'login' ? "Don't have an account? Register" : "Already have an account? Login"}
-            </button>
-          )}
-        </div> */}
+        {/* Branding Footer */}
+        <div className="mt-12 flex flex-col items-center gap-2 opacity-30">
+            <Shield size={16} className="text-black" />
+            <span className="text-[9px] font-black uppercase tracking-[0.3em]">Encrypted Session</span>
+        </div>
       </div>
     </div>
   );

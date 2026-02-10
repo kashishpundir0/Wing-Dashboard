@@ -1,140 +1,197 @@
 import React, { useState } from 'react';
 import { 
   MessageSquare, 
-  Send, 
-  Mail, 
-  Frown, 
-  Meh, 
-  Smile, 
-  Laugh, 
-  Angry, 
-  CheckCircle2 
+  Search,
+  Filter,
+  User,
+  Star,
+  MoreVertical,
+  Calendar,
+  ArrowUpRight,
+  TrendingUp,
+  Smile,
+  Frown,
+  Meh
 } from 'lucide-react';
 
 const Feedback = () => {
-  const [rating, setRating] = useState(0);
-  const [message, setMessage] = useState('');
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [filter, setFilter] = useState('All');
 
-  const ratings = [
-    { id: 1, icon: <Angry size={32} />, label: "Terrible", color: "hover:text-red-500" },
-    { id: 2, icon: <Frown size={32} />, label: "Bad", color: "hover:text-orange-500" },
-    { id: 3, icon: <Meh size={32} />, label: "Okay", color: "hover:text-yellow-500" },
-    { id: 4, icon: <Smile size={32} />, label: "Good", color: "hover:text-green-500" },
-    { id: 5, icon: <Laugh size={32} />, label: "Amazing", color: "hover:text-emerald-500" },
+  // Mock Data for User Feedbacks
+  const feedbackData = [
+    {
+      id: 1,
+      user: "Kashish Pundir",
+      email: "kashish@gmail.com",
+      rating: 5,
+      sentiment: "Amazing",
+      comment: "The interface is extremely clean and easy to navigate. I love the new appointment scheduling feature!",
+      date: "Oct 24, 2023",
+      status: "Read"
+    },
+    {
+      id: 2,
+      user: "Rohan Sharma",
+      email: "rohan.s@outlook.com",
+      rating: 3,
+      sentiment: "Okay",
+      comment: "The platform is good but I experienced some lag during the video call yesterday.",
+      date: "Oct 23, 2023",
+      status: "Unread"
+    },
+    {
+      id: 3,
+      user: "Ananya Iyer",
+      email: "ananya.i@gmail.com",
+      rating: 2,
+      sentiment: "Bad",
+      comment: "I found it difficult to find the restaurant menu on the mobile version. Please improve the UX for small screens.",
+      date: "Oct 22, 2023",
+      status: "Read"
+    },
+    {
+      id: 4,
+      user: "Vikram Singh",
+      email: "v.singh@wingmates.in",
+      rating: 5,
+      sentiment: "Amazing",
+      comment: "Excellent support team! They resolved my query within 10 minutes.",
+      date: "Oct 21, 2023",
+      status: "Read"
+    }
   ];
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (rating === 0) return alert("Please select a rating");
-    setIsSubmitted(true);
-    // Logic to send feedback to API would go here
+  const stats = [
+    { label: "Total Responses", value: "1,284", icon: MessageSquare, trend: "+12%" },
+    { label: "Avg. Rating", value: "4.8", icon: Star, trend: "+0.2" },
+    { label: "Positive Sentiment", value: "92%", icon: TrendingUp, trend: "+5%" },
+  ];
+
+  const getSentimentIcon = (sentiment) => {
+    switch (sentiment) {
+      case 'Amazing': return <Smile className="text-emerald-500" size={18} />;
+      case 'Okay': return <Meh className="text-amber-500" size={18} />;
+      case 'Bad': return <Frown className="text-rose-500" size={18} />;
+      default: return <Smile size={18} />;
+    }
   };
 
-  if (isSubmitted) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] animate-in fade-in zoom-in duration-500">
-        <div className="bg-white p-12 rounded-[3rem] shadow-2xl shadow-purple-100 flex flex-col items-center text-center max-w-md border border-purple-50">
-          <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6">
-            <CheckCircle2 size={44} />
-          </div>
-          <h2 className="text-3xl font-black text-gray-800 mb-2">Thank You!</h2>
-          <p className="text-gray-500 font-medium">Your feedback has been received. We appreciate your help in making Wingmann better.</p>
-          <button 
-            onClick={() => setIsSubmitted(false)}
-            className="mt-8 text-[#632281] font-black uppercase text-xs tracking-widest hover:underline"
-          >
-            Send another response
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="max-w-4xl mx-auto animate-in slide-in-from-bottom-4 duration-500">
-      {/* Header Section */}
-      <div className="flex items-center gap-4 mb-8">
-        <div className="p-3 bg-purple-100 text-[#632281] rounded-2xl">
-          <MessageSquare size={28} />
-        </div>
+    <div className="max-w-7xl mx-auto space-y-10 p-6 bg-white min-h-screen">
+      
+      {/* 1. Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-slate-100 pb-10">
         <div>
-          <h1 className="text-3xl font-black text-gray-800">Feedback</h1>
-          <p className="text-purple-500 font-medium">We value your thoughts on the experience.</p>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic">User Feedback</h1>
+          <p className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.2em] mt-2">Sentiment & Experience Analysis</p>
         </div>
-      </div>
-
-      <div className="bg-white rounded-[3rem] shadow-2xl shadow-purple-100 border border-purple-50 overflow-hidden flex flex-col md:flex-row">
         
-        {/* Left Side: Illustration/Text Area */}
-        <div className="bg-[#632281] p-12 text-white md:w-1/3 flex flex-col justify-between">
-          <div>
-            <h2 className="text-3xl font-black leading-tight mb-4">How's your experience with Wingmann?</h2>
-            <p className="text-purple-200 font-medium">Your genuine feedback will help us to serve you better and improve our platform.</p>
-          </div>
-          <div className="hidden md:block">
-            <div className="w-16 h-1 bg-purple-400 rounded-full mb-4 opacity-50"></div>
-            <p className="text-xs font-bold uppercase tracking-widest text-purple-300">Admin Portal v1.0</p>
-          </div>
-        </div>
-
-        {/* Right Side: Form Area */}
-        <div className="p-8 md:p-12 md:w-2/3">
-          <form onSubmit={handleSubmit} className="space-y-10">
-            
-            {/* Rating Selection */}
-            <div className="space-y-4">
-              <label className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Rate your experience</label>
-              <div className="flex justify-between items-center max-w-sm">
-                {ratings.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => setRating(item.id)}
-                    className={`group flex flex-col items-center gap-2 transition-all duration-300 ${
-                      rating === item.id ? 'scale-125 text-[#632281]' : 'text-gray-300 hover:scale-110'
-                    } ${item.color}`}
-                  >
-                    <div className={`${rating === item.id ? 'bg-purple-100 p-2 rounded-xl' : ''}`}>
-                      {item.icon}
-                    </div>
-                    <span className={`text-[10px] font-black uppercase tracking-tighter transition-opacity ${rating === item.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-                      {item.label}
-                    </span>
-                  </button>
-                ))}
+        {/* Quick Stats Grid */}
+        <div className="flex flex-wrap gap-4">
+          {stats.map((stat, idx) => (
+            <div key={idx} className="bg-slate-50 border border-slate-100 p-4 rounded-2xl min-w-[160px]">
+              <div className="flex justify-between items-start mb-2">
+                <stat.icon size={16} className="text-slate-400" />
+                <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded flex items-center">
+                  <ArrowUpRight size={10} /> {stat.trend}
+                </span>
               </div>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
+              <p className="text-xl font-black text-slate-900 mt-0.5">{stat.value}</p>
             </div>
-
-            {/* Message Area */}
-            <div className="space-y-3">
-              <label className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Your Comments</label>
-              <textarea 
-                required
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Write message..."
-                className="w-full h-40 p-6 bg-purple-50 border-2 border-transparent focus:border-purple-200 focus:bg-white rounded-[2rem] outline-none transition-all font-medium text-gray-700 resize-none shadow-inner"
-              />
-            </div>
-
-            {/* Submit Button */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-4">
-              <div className="flex items-center gap-2 text-gray-400">
-                <Mail size={16} />
-                <span className="text-xs font-bold italic">hello@wingmann.in</span>
-              </div>
-              
-              <button 
-                type="submit"
-                className="w-full sm:w-auto flex items-center justify-center gap-3 bg-[#632281] text-white px-10 py-4 rounded-2xl font-black uppercase text-xs tracking-[0.2em] shadow-xl shadow-purple-100 hover:bg-purple-900 transition-all active:scale-95"
-              >
-                Send Feedback <Send size={16} />
-              </button>
-            </div>
-          </form>
+          ))}
         </div>
       </div>
+
+      {/* 2. Filters & Search */}
+      <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+        <div className="flex gap-2 p-1.5 bg-slate-50 rounded-xl border border-slate-100 w-full md:w-auto">
+          {['All', 'Positive', 'Neutral', 'Negative'].map((opt) => (
+            <button
+              key={opt}
+              onClick={() => setFilter(opt)}
+              className={`flex-1 md:flex-none px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                filter === opt ? 'bg-black text-white shadow-lg' : 'text-slate-400 hover:text-black'
+              }`}
+            >
+              {opt}
+            </button>
+          ))}
+        </div>
+
+        <div className="relative w-full md:w-72">
+          <Search size={16} className="absolute left-4 top-3.5 text-slate-400" />
+          <input 
+            type="text" 
+            placeholder="SEARCH FEEDBACK..." 
+            className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:border-black outline-none transition-all uppercase tracking-widest" 
+          />
+        </div>
+      </div>
+
+      {/* 3. Feedback List */}
+      <div className="grid grid-cols-1 gap-4">
+        {feedbackData.map((item) => (
+          <div key={item.id} className="bg-white border border-slate-100 rounded-3xl p-6 hover:shadow-xl hover:border-slate-200 transition-all group">
+            <div className="flex flex-col md:flex-row justify-between gap-6">
+              
+              {/* User Info & Rating */}
+              <div className="flex gap-4 min-w-[240px]">
+                <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-900 font-black shrink-0 border border-slate-200">
+                  {item.user[0]}
+                </div>
+                <div className="space-y-1">
+                  <h4 className="font-black text-slate-900 text-sm uppercase tracking-tight">{item.user}</h4>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{item.email}</p>
+                  <div className="flex items-center gap-1.5 mt-2">
+                    {[...Array(5)].map((_, i) => (
+                      <Star 
+                        key={i} 
+                        size={12} 
+                        className={i < item.rating ? 'fill-black text-black' : 'text-slate-200'} 
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Comment Content */}
+              <div className="flex-1 bg-slate-50/50 p-5 rounded-2xl border border-slate-50 relative">
+                <div className="flex items-center gap-2 mb-2">
+                  {getSentimentIcon(item.sentiment)}
+                  <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{item.sentiment}</span>
+                </div>
+                <p className="text-slate-600 text-sm font-medium leading-relaxed italic">"{item.comment}"</p>
+                {item.status === 'Unread' && (
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-black rounded-full border-2 border-white"></div>
+                )}
+              </div>
+
+              {/* Date & Actions */}
+              <div className="flex md:flex-col justify-between items-end min-w-[100px]">
+                <div className="flex items-center gap-2 text-slate-400">
+                  <Calendar size={12} />
+                  <span className="text-[10px] font-black uppercase tracking-widest">{item.date}</span>
+                </div>
+                <div className="flex gap-2">
+                  <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-black">
+                    <MoreVertical size={16} />
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Footer */}
+      <div className="flex justify-center pt-6 pb-10">
+        <button className="px-10 py-4 bg-slate-50 border border-slate-200 text-slate-400 font-black uppercase text-xs tracking-[0.2em] rounded-2xl hover:bg-black hover:text-white hover:border-black transition-all">
+          Load Archive
+        </button>
+      </div>
+
     </div>
   );
 };
