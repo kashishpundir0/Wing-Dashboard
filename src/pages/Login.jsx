@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, UserPlus, Shield } from 'lucide-react';
 import { loginUser } from '../api/loginApi';
 import LogoImg from '../assets/logo.png';
+import { toast } from 'react-hot-toast';
+
 
 const Login = () => {
   const navigate = useNavigate();
@@ -23,16 +25,33 @@ const Login = () => {
     setError('');
 
     try {
+      // --- DUMMY INTERVIEWER LOGIN START ---
+      // You can use these credentials to test the interviewer dashboard
+      if (formData.email === 'interviewer@test.com' && formData.password === 'password123') {
+        localStorage.setItem('token', 'dummy-interviewer-token');
+        localStorage.setItem('userRole', 'interviewer');
+        toast.success('Logged in as Interviewer (Mock)');
+        navigate('/interviewer-overview'); // Redirect to interviewer dashboard
+        return;
+      }
+      // --- DUMMY INTERVIEWER LOGIN END ---
+
       if (mode === 'register') {
-        // registration logic here if needed
+        // registration logic...
       } else {
+        // This is your existing Admin API call
         const data = await loginUser(formData);
-        
+
         localStorage.setItem('token', data.token);
-        const role = data.role || 'admin'; 
+        const role = data.role || 'admin';
         localStorage.setItem('userRole', role);
-        
-        navigate('/overview');
+
+        // Dynamic Redirection based on role
+        if (role === 'interviewer') {
+          navigate('/interviewer-overview');
+        } else {
+          navigate('/overview');
+        }
       }
     } catch (err) {
       setError(err.message || 'Authentication failed');
@@ -40,13 +59,12 @@ const Login = () => {
       setLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-slate-50 p-6 font-sans">
-      
+
       {/* Container Card */}
       <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-[0_32px_64px_-15px_rgba(0,0,0,0.1)] p-10 md:p-12 border border-slate-100 relative overflow-hidden">
-        
+
         {/* Subtle Decorative Element */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-full -mr-16 -mt-16 opacity-50"></div>
 
@@ -147,8 +165,8 @@ const Login = () => {
 
         {/* Branding Footer */}
         <div className="mt-12 flex flex-col items-center gap-2 opacity-30">
-            <Shield size={16} className="text-black" />
-            <span className="text-[9px] font-black uppercase tracking-[0.3em]">Encrypted Session</span>
+          <Shield size={16} className="text-black" />
+          <span className="text-[9px] font-black uppercase tracking-[0.3em]">Encrypted Session</span>
         </div>
       </div>
     </div>
