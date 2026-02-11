@@ -74,7 +74,7 @@ const Overview = () => {
               <p className="text-sm text-slate-400 font-medium mt-1">Stage-by-stage progression</p>
             </div>
           </div>
-          <div className="h-[320px] w-full">
+          <div className="h-80 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={acquisitionData} margin={{ top: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -133,7 +133,7 @@ const Overview = () => {
               <p className="text-sm text-slate-400 font-medium mt-1">Workflow progression analytics</p>
             </div>
           </div>
-          <div className="h-[300px]">
+          <div className="h-75">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={pipelineData}>
                 <defs>

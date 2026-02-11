@@ -13,7 +13,7 @@ const Toast = ({ message, type, onClose }) => {
     }, [onClose]);
 
     return (
-        <div className="fixed top-10 right-10 z-[110] animate-in slide-in-from-right-10 duration-300">
+        <div className="fixed top-10 right-10 z-110 animate-in slide-in-from-right-10 duration-300">
             <div className={`flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border ${type === 'success' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' : 'bg-rose-50 border-rose-100 text-rose-700'}`}>
                 {type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
                 <p className="font-bold text-sm">{message}</p>
@@ -132,7 +132,7 @@ const Interviews = () => {
                 </div>
             </div>
 
-            <div className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-xl shadow-slate-200/50">
+            <div className="bg-white rounded-4xl border border-slate-200 overflow-hidden shadow-xl shadow-slate-200/50">
                 <table className="w-full text-left border-collapse">
                     <thead className="bg-slate-50/80 border-b border-slate-200">
                         <tr>
@@ -173,7 +173,7 @@ const Interviews = () => {
                                 </td>
                                 <td className="px-8 py-6 text-right">
                                     <div className="flex justify-end gap-2.5">
-                                        <button onClick={() => showNotify('Joining Video...')} className="p-3 bg-gradient-to-br from-cyan-500 to-emerald-500 text-white rounded-xl shadow-lg shadow-cyan-100 hover:-translate-y-0.5 transition-all">
+                                        <button onClick={() => showNotify('Joining Video...')} className="p-3 bg-linear-to-br from-cyan-500 to-emerald-500 text-white rounded-xl shadow-lg shadow-cyan-100 hover:-translate-y-0.5 transition-all">
                                             <Video size={18} />
                                         </button>
                                         <button onClick={() => setRejectingUser(user)} className="px-5 py-2.5 rounded-xl border border-rose-200 text-rose-600 font-bold text-xs hover:bg-rose-500 hover:text-white transition-all">
@@ -199,8 +199,8 @@ const Interviews = () => {
 
             {/* Rejection Modal */}
             {rejectingUser && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[120] flex items-center justify-center p-4">
-                    <div className="bg-white w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl border border-rose-50 animate-in fade-in zoom-in-95 duration-300">
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-120 flex items-center justify-center p-4">
+                    <div className="bg-white w-full max-w-md rounded-4xl p-8 shadow-2xl border border-rose-50 animate-in fade-in zoom-in-95 duration-300">
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-xl font-black text-slate-900">Rejection Reason</h3>
                             <button onClick={() => setRejectingUser(null)}><X size={20} className="text-slate-400" /></button>
@@ -210,7 +210,7 @@ const Interviews = () => {
                             value={rejectionComment}
                             onChange={(e) => setRejectionComment(e.target.value)}
                             placeholder="Detail why this profile was rejected..."
-                            className="w-full h-40 bg-slate-50 border border-slate-100 rounded-[1.5rem] p-5 text-slate-700 font-medium focus:ring-2 focus:ring-rose-100 focus:bg-white transition-all resize-none"
+                            className="w-full h-40 bg-slate-50 border border-slate-100 rounded-3xl p-5 text-slate-700 font-medium focus:ring-2 focus:ring-rose-100 focus:bg-white transition-all resize-none"
                         />
                         <div className="grid grid-cols-2 gap-4 mt-6">
                             <button onClick={() => setRejectingUser(null)} className="py-4 rounded-2xl bg-slate-50 text-slate-500 font-bold text-xs uppercase hover:bg-slate-100">Cancel</button>
@@ -222,18 +222,18 @@ const Interviews = () => {
 
             {/* Profile Review Modal */}
             {selectedUser && (
-                <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-xl z-[100] flex items-center justify-center p-4">
+                <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-xl z-100 flex items-center justify-center p-4">
                     {/* ... (Same Profile Modal Code as your original file) ... */}
                     <div className="bg-white w-full max-w-6xl rounded-[3.5rem] overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-500 max-h-[95vh] flex flex-col md:flex-row border border-white/20">
                         {/* LEFT COLUMN */}
                         <div className="w-full md:w-[40%] relative bg-slate-900 flex flex-col overflow-hidden">
                             <img src={selectedUser.photo} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-black/30" />
+                            <div className="absolute inset-0 bg-linear-to-t from-slate-900 via-transparent to-black/30" />
                             <div className="relative z-10 p-8 flex justify-between">
                                 <button onClick={() => setSelectedUser(null)} className="p-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-2xl text-white transition-all"><X size={24} /></button>
                             </div>
                             <div className="mt-auto relative z-10 p-10 space-y-4">
-                                <div className="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-[2rem] inline-block text-white">
+                                <div className="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-4xl inline-block text-white">
                                     <p className="text-white/70 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Compatibility</p>
                                     <p className="text-white text-4xl font-black">{selectedUser.compatibility}</p>
                                 </div>

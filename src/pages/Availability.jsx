@@ -75,7 +75,7 @@ const Availability = () => {
       {/* Modal Overlay */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-[2rem] w-full max-w-md p-8 shadow-2xl">
+          <div className="bg-white rounded-4xl w-full max-w-md p-8 shadow-2xl">
             <div className="flex justify-between items-center mb-6">
               <h4 className="text-xl font-black text-[#1F1F2E]">Add Slot for {activeDay}</h4>
               <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600">
@@ -116,7 +116,7 @@ const Availability = () => {
       )}
 
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 bg-white p-8 rounded-4xl border border-slate-100 shadow-sm">
         <div>
           <h3 className="text-3xl font-black text-[#1F1F2E]">My Availability</h3>
           <p className="text-slate-500 font-medium">Manage your recurring schedule and specific date overrides</p>
@@ -133,7 +133,7 @@ const Availability = () => {
 
         {/* Left Column: Weekly Schedule */}
         <div className="xl:col-span-2 space-y-6">
-          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-8">
+          <div className="bg-white rounded-4xl border border-slate-100 shadow-sm p-8">
             <div className="flex items-center gap-3 mb-8">
               <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
                 <Clock className="text-indigo-600" size={20} />
@@ -176,7 +176,7 @@ const Availability = () => {
 
         {/* Right Column: Date Specific Overrides */}
         <div className="xl:col-span-1 space-y-6">
-          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-8">
+          <div className="bg-white rounded-4xl border border-slate-100 shadow-sm p-8">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
                 <CalendarIcon className="text-amber-600" size={20} />
@@ -243,7 +243,7 @@ const Availability = () => {
             </div>
           </div>
 
-          <div className="p-6 bg-slate-900 rounded-[2rem] text-white overflow-hidden relative">
+          <div className="p-6 bg-slate-900 rounded-4xl text-white overflow-hidden relative">
             <div className="relative z-10">
               <div className="flex items-center gap-2 mb-2 text-amber-400">
                 <AlertCircle size={18} />

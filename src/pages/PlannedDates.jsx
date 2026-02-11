@@ -232,7 +232,7 @@ const PlannedDates = () => {
 
       {/* Detail Modal */}
       {viewingDetails && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-lg rounded-[3rem] shadow-[0_40px_80px_-15px_rgba(0,0,0,0.3)] overflow-hidden border border-slate-100">
             <div className="p-10 md:p-14">
               <div className="flex justify-between items-start mb-12">
@@ -249,7 +249,7 @@ const PlannedDates = () => {
 
               <div className="space-y-8">
                 {/* Venue Info Box */}
-                <div className="p-8 bg-slate-50 border border-slate-100 rounded-[2rem]">
+                <div className="p-8 bg-slate-50 border border-slate-100 rounded-4xl">
                   <h4 className="font-black text-black text-xl uppercase tracking-tight mb-6">{viewingDetails.restaurant}</h4>
                   <div className="space-y-4">
                     <div className="flex items-center gap-4 text-[11px] font-black text-slate-600 uppercase tracking-widest">
