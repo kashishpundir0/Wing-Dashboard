@@ -32,18 +32,16 @@ const Overview = () => {
   ];
 
   const StatCard = ({ title, value, icon: Icon, trend, subtext, isHero }) => (
-    <div className={`p-8 rounded-[2.5rem] transition-all flex flex-col justify-between h-56 ${
-      isHero 
-      ? 'bg-[#1F1F2E] text-white shadow-2xl shadow-[#1F1F2E]/30' 
+    <div className={`p-8 rounded-[2.5rem] transition-all flex flex-col justify-between h-56 ${isHero
+      ? 'bg-[#1F1F2E] text-white shadow-2xl shadow-[#1F1F2E]/30'
       : 'bg-white text-[#1F1F2E] border border-slate-100 shadow-sm'
-    }`}>
+      }`}>
       <div className="flex justify-between items-start">
         <div className={`p-3 rounded-2xl ${isHero ? 'bg-white/10' : 'bg-[#F5F6FA]'}`}>
           <Icon size={22} className={isHero ? 'text-white' : 'text-[#1F1F2E]'} />
         </div>
-        <span className={`flex items-center text-[11px] font-bold px-3 py-1.5 rounded-full ${
-          isHero ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-50 text-emerald-600'
-        }`}>
+        <span className={`flex items-center text-[11px] font-bold px-3 py-1.5 rounded-full ${isHero ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-50 text-emerald-600'
+          }`}>
           <ArrowUpRight size={14} className="mr-1" /> {trend}
         </span>
       </div>
@@ -56,8 +54,8 @@ const Overview = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#F5F6FA] w-full p-6 md:p-10 space-y-10 overflow-x-hidden">
-      
+    <div className="min-h-screen bg-[#F5F6FA] w-full md:p-10 space-y-10 overflow-x-hidden">
+
       {/* 1. KPI Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         <StatCard title="Total Traffic" value="12,450" icon={MousePointer2} trend="14%" subtext="Visits this month" isHero={true} />
@@ -67,7 +65,7 @@ const Overview = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
+
         {/* 2. User Acquisition Funnel */}
         <div className="lg:col-span-2 bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100">
           <div className="flex justify-between items-center mb-10">
@@ -112,18 +110,18 @@ const Overview = () => {
             </div>
           </div>
           <div className="space-y-3">
-             <div className="flex justify-between items-center p-4 bg-[#F5F6FA] rounded-2xl">
-                <span className="flex items-center gap-3 text-xs font-bold text-slate-500">
-                  <CheckCircle size={16} className="text-[#1F1F2E]" /> Accepted
-                </span>
-                <span className="text-sm font-bold text-[#1F1F2E]">120</span>
-             </div>
-             <div className="flex justify-between items-center p-4 bg-[#F5F6FA] rounded-2xl opacity-50">
-                <span className="flex items-center gap-3 text-xs font-bold text-slate-500">
-                  <XCircle size={16} className="text-slate-400" /> Rejected
-                </span>
-                <span className="text-sm font-bold text-slate-400">260</span>
-             </div>
+            <div className="flex justify-between items-center p-4 bg-[#F5F6FA] rounded-2xl">
+              <span className="flex items-center gap-3 text-xs font-bold text-slate-500">
+                <CheckCircle size={16} className="text-[#1F1F2E]" /> Accepted
+              </span>
+              <span className="text-sm font-bold text-[#1F1F2E]">120</span>
+            </div>
+            <div className="flex justify-between items-center p-4 bg-[#F5F6FA] rounded-2xl opacity-50">
+              <span className="flex items-center gap-3 text-xs font-bold text-slate-500">
+                <XCircle size={16} className="text-slate-400" /> Rejected
+              </span>
+              <span className="text-sm font-bold text-slate-400">260</span>
+            </div>
           </div>
         </div>
 
@@ -140,12 +138,12 @@ const Overview = () => {
               <AreaChart data={pipelineData}>
                 <defs>
                   <linearGradient id="colorDark" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={THEME_DARK} stopOpacity={0.1}/>
-                    <stop offset="95%" stopColor={THEME_DARK} stopOpacity={0}/>
+                    <stop offset="5%" stopColor={THEME_DARK} stopOpacity={0.1} />
+                    <stop offset="95%" stopColor={THEME_DARK} stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="stage" axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: '700', fill: '#94a3b8'}} dy={10} />
+                <XAxis dataKey="stage" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: '700', fill: '#94a3b8' }} dy={10} />
                 <YAxis hide />
                 <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
                 <Area type="monotone" dataKey="count" stroke={THEME_DARK} strokeWidth={4} fillOpacity={1} fill="url(#colorDark)" />

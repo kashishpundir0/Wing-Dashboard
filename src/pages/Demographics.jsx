@@ -33,8 +33,8 @@ const Demographics = () => {
     ]
   };
 
-    return (
-    <div className="p-6 max-w-7xl mx-auto space-y-8 bg-slate-50/30 min-h-screen">
+  return (
+    <div className=" max-w-7xl mx-auto  bg-slate-50/30 min-h-screen">
       {/* HEADER SECTION */}
       <div className="flex flex-col md:flex-row justify-between items-end gap-6 border-b border-slate-200 pb-8">
         <div>
@@ -51,21 +51,21 @@ const Demographics = () => {
       </div>
 
       {/* ROW 1: Gender & Regional */}
-      <GenderChart 
-        maleCount={genderData.male} 
-        femaleCount={genderData.female} 
-        regionalBreakdown={genderData.regional} 
+      <GenderChart
+        maleCount={genderData.male}
+        femaleCount={genderData.female}
+        regionalBreakdown={genderData.regional}
       />
 
       {/* ROW 2: Age & Occupation */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         <AgeDistribution ageData={ageData} />
-        
+
         <div className="flex flex-col gap-6">
-           <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] ml-2">Market Segments</h3>
-           {occupationData.map((item, idx) => (
-             <OccupationCard key={idx} {...item} />
-           ))}
+          <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] ml-2">Market Segments</h3>
+          {occupationData.map((item, idx) => (
+            <OccupationCard key={idx} {...item} />
+          ))}
         </div>
       </div>
     </div>
