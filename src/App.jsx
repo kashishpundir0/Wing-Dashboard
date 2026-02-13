@@ -14,6 +14,7 @@ import Interviewers from './pages/Interviewers';
 import Feedback from './pages/Feedback';
 import Availability from './pages/Availability';
 import InterviewerOverview from './pages/InterviewerOverview';
+import Users from './pages/UsersPage';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const userRole = localStorage.getItem('userRole');
@@ -67,6 +68,7 @@ const AppContent = () => {
             <Route path="/dates" element={<ProtectedRoute allowedRoles={['admin']}><PlannedDates /></ProtectedRoute>} />
             <Route path="/restaurants" element={<ProtectedRoute allowedRoles={['admin']}><Restaurants /></ProtectedRoute>} />
             <Route path="/feedback" element={<ProtectedRoute allowedRoles={['admin']}><Feedback /></ProtectedRoute>} />
+            <Route path="/users" element={<ProtectedRoute allowedRoles={['admin']}><Users /></ProtectedRoute>} />
 
             {/* Interviewer Only Routes */}
             <Route path="/interviewer-overview" element={<ProtectedRoute allowedRoles={['interviewer']}><InterviewerOverview /> </ProtectedRoute>} />

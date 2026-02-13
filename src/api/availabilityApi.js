@@ -1,15 +1,17 @@
 import apiClient from './apiClient';
 
 export const availabilityApi = {
-    // GET: Fetch all records
     getInterviewerAvailability: (interviewerId) =>
         apiClient.get(`/api/interviewer-availability/${interviewerId}`),
 
-    // POST: Used to Update the array of slots (Add/Remove items)
     setAvailability: (payload) =>
         apiClient.post('/api/interviewer-availability/set', payload),
 
-    // DELETE: Removes the entire record (All slots for that day)
-    deleteEntireDay: (availabilityId) =>
-        apiClient.delete(`/api/interviewer-availability/delete/${availabilityId}`)
+    // Matches: POST https://wingmann.onrender.com/api/interviewer-availability/delete-day
+    deleteDayByDate: (payload) =>
+        apiClient.post('/api/interviewer-availability/delete-day', payload),
+
+    // Matches: POST https://wingmann.onrender.com/api/interviewer-availability/delete-slot-by-date
+    deleteSlotByDate: (payload) =>
+        apiClient.post('/api/interviewer-availability/delete-slot-by-date', payload)
 };

@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { getInterviewers, deleteInterviewer } from '../api/interviewerApi';
 import WingmatesSignUp from './WingmatesSignUp';
-import { UserPlus, Mail, MapPin, Edit3, Trash2, Phone, ClipboardList, Lock, Copy, AlertTriangle, Eye } from 'lucide-react';
+// Added Calendar icon to imports
+import { UserPlus, Mail, MapPin, Edit3, Trash2, Phone, ClipboardList, AlertTriangle, Calendar } from 'lucide-react';
 
 const Interviewers = () => {
   const [interviewers, setInterviewers] = useState([]);
@@ -14,7 +15,6 @@ const Interviewers = () => {
     setLoading(true);
     try {
       const data = await getInterviewers();
-      // LOG THIS TO SEE WHAT THE BACKEND IS SENDING
       console.log("Full List Data from Server:", data);
       setInterviewers(data || []);
     } catch (error) {
@@ -84,8 +84,14 @@ const Interviewers = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
           {interviewers.map((person) => {
-            // TRYING ALL POSSIBLE DATA PATHS FOR THE PASSWORD
-            const accessKey = person.generatedCredentials?.password || person.password || person.pass || person.accessKey;
+            // Formatting the date
+            const joinedDate = person.createdAt
+              ? new Date(person.createdAt).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+              })
+              : "N/A";
 
             return (
               <div key={person._id} className="bg-white p-7 rounded-[2.5rem] border border-slate-200 hover:shadow-xl transition-all relative flex flex-col">
@@ -104,26 +110,9 @@ const Interviewers = () => {
                   <div className="flex items-center gap-3 text-slate-500 text-[10px] font-bold uppercase tracking-widest">
                     <Phone size={14} className="text-[#1F1F2E]" /> {person.mobileNumber}
                   </div>
-
-                  {/* PASSWORD BOX */}
-                  <div className="mt-4 p-3 bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <Lock size={12} className="text-emerald-600" />
-                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Access Key</span>
-                      </div>
-                      {accessKey && (
-                        <button
-                          onClick={() => { navigator.clipboard.writeText(accessKey); toast.success("Copied!"); }}
-                          className="text-[8px] font-bold text-slate-400 hover:text-[#1F1F2E]"
-                        >
-                          COPY
-                        </button>
-                      )}
-                    </div>
-                    <code className="block w-full text-[10px] font-bold text-[#1F1F2E] tracking-tight bg-white px-2 py-2 rounded shadow-sm break-all min-h-[30px]">
-                      {accessKey || "N/A"}
-                    </code>
+                  {/* Added Joined Date Section */}
+                  <div className="flex items-center gap-3 text-slate-500 text-[10px] font-bold uppercase tracking-widest">
+                    <Calendar size={14} className="text-[#1F1F2E]" /> Joined: {joinedDate}
                   </div>
                 </div>
 

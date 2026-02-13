@@ -169,7 +169,7 @@ const WingmatesSignUp = ({ onClose, refreshData, initialData }) => {
             </div>
           </div>
 
-          {initialData && (
+          {/* {initialData && (
             <div className="p-5 bg-[#1F1F2E] rounded-2xl text-white mt-4">
               <div className="flex justify-between items-center mb-2">
                 <p className="text-[9px] font-bold uppercase tracking-widest opacity-60">Assigned Access Key</p>
@@ -182,7 +182,7 @@ const WingmatesSignUp = ({ onClose, refreshData, initialData }) => {
                 </code>
               </div>
             </div>
-          )}
+          )} */}
 
           {!initialData && (
             <div className="text-center bg-slate-50 p-5 rounded-xl border border-dashed border-slate-200">

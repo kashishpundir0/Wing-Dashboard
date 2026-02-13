@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
   LayoutDashboard, Calendar, Clock, Utensils, LogOut,
-  BarChart3, Users, MessageSquare, ChevronRight
+  BarChart3, Users, MessageSquare, ChevronRight, UserCheck
 } from 'lucide-react';
 import LogoImg from '../../assets/logo.png';
 
@@ -23,7 +23,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { id: 'dates', label: 'Planned Dates', icon: Clock, path: '/dates', roles: ['admin'] },
     { id: 'restaurants', label: 'Restaurants', icon: Utensils, path: '/restaurants', roles: ['admin'] },
     { id: 'feedback', label: 'Feedback', icon: MessageSquare, path: '/feedback', roles: ['admin'] },
-
+    { id: 'users', label: 'Users', icon: Users, path: '/users', roles: ['admin'] }, // NEW
     // Interviewer Only
     { id: 'interviewer-overview', label: 'Dashboard', icon: LayoutDashboard, path: '/interviewer-overview', roles: ['interviewer'] },
     { id: 'availability', label: 'My Availability', icon: Clock, path: '/availability', roles: ['interviewer'] },
