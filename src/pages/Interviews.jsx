@@ -13,7 +13,7 @@ const Toast = ({ message, type, onClose }) => {
     }, [onClose]);
 
     return (
-        <div className="fixed top-10 right-10 z-[150] animate-in slide-in-from-right-10 duration-300">
+        <div className="fixed top-10 right-10 z-150 animate-in slide-in-from-right-10 duration-300">
             <div className={`flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border ${type === 'success' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' : 'bg-rose-50 border-rose-100 text-rose-700'}`}>
                 {type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
                 <p className="font-bold text-sm">{message}</p>
@@ -172,7 +172,7 @@ const Interviews = () => {
 
             {/* Restored Rejection Box (Modal) */}
             {rejectingUser && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-200 flex items-center justify-center p-4">
                     <div className="bg-white w-full max-w-md rounded-4xl p-8 shadow-2xl border border-rose-50 animate-in fade-in zoom-in-95 duration-300">
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-xl font-black text-slate-900">Rejection Reason</h3>
@@ -196,7 +196,7 @@ const Interviews = () => {
 
             {/* Profile Review Modal */}
             {selectedUser && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-100 flex items-center justify-center p-4">
                     <div className="bg-white w-full max-w-5xl rounded-[3rem] overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-500 max-h-[92vh] flex flex-col md:flex-row border border-slate-100">
 
                         <div className="w-full md:w-1/2 relative bg-slate-200">
@@ -255,8 +255,8 @@ const Interviews = () => {
                                     </div>
                                     <div className="space-y-3">
                                         <div className="grid grid-cols-2 gap-3">
-                                            <img src={selectedUser.gallery[0]} className="w-full h-48 object-cover rounded-[1.5rem]" alt="" />
-                                            <img src={selectedUser.gallery[1]} className="w-full h-48 object-cover rounded-[1.5rem]" alt="" />
+                                            <img src={selectedUser.gallery[0]} className="w-full h-48 object-cover rounded-3xl" alt="" />
+                                            <img src={selectedUser.gallery[1]} className="w-full h-48 object-cover rounded-3xl" alt="" />
                                         </div>
                                         <div className="grid grid-cols-3 gap-3">
                                             <img src={selectedUser.gallery[2]} className="w-full h-28 object-cover rounded-2xl" alt="" />

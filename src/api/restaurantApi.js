@@ -1,6 +1,7 @@
 import apiClient from './apiClient';
 
-export const IMAGE_BASE_URL = 'https://wingmann.onrender.com/';
+// Change this in your API files:
+export const IMAGE_BASE_URL = 'https://wingmann.online/api/';
 
 export const getAllRestaurants = async () => {
   const response = await apiClient.get('/api/restaurants/all');

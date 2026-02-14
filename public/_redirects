@@ -1,5 +1,2 @@
-# This proxies your API calls to the Render backend
-/api/*  https://wing-man-backend-2.onrender.com/api/:splat  200
-
-# This ensures that React Router works when you refresh the page
-/*      /index.html                                       200
+/api/*  https://wingmann.online/api/api/:splat  200
+/*      /index.html                            200

@@ -247,7 +247,7 @@ const Restaurants = () => {
       )}
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
           <div className="bg-white w-full max-w-xl rounded-3xl shadow-2xl flex flex-col max-h-[90vh]">
             <div className="bg-black p-8 flex justify-between items-center shrink-0">
               <h3 className="text-white text-xl font-black uppercase tracking-widest">{editId ? 'Update Venue' : 'Onboard Venue'}</h3>
@@ -294,7 +294,7 @@ const Restaurants = () => {
 
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Cuisine Style (Multiple) *</label>
-                  <div onClick={() => setShowFoodDropdown(!showFoodDropdown)} className="min-h-[56px] w-full px-5 py-3 bg-slate-50 rounded-xl border border-slate-100 flex flex-wrap gap-2 items-center cursor-pointer hover:border-black transition-all">
+                  <div onClick={() => setShowFoodDropdown(!showFoodDropdown)} className="min-w-14 w-full px-5 py-3 bg-slate-50 rounded-xl border border-slate-100 flex flex-wrap gap-2 items-center cursor-pointer hover:border-black transition-all">
                     {formData.typeOfFood.length === 0 ? <span className="text-sm text-slate-400 font-medium">Select cuisines...</span> :
                       formData.typeOfFood.map(type => (
                         <span key={type} className="bg-black text-white text-[10px] font-bold px-3 py-1 rounded-lg flex items-center gap-1">
@@ -320,7 +320,7 @@ const Restaurants = () => {
 
               <div className="flex gap-4 pt-4 pb-10">
                 <Button onClick={() => setIsModalOpen(false)} variant="outline" className="flex-1 py-5 border-slate-200 text-slate-400">Cancel</Button>
-                <Button onClick={handleSave} className="flex-[2] py-5 bg-black text-white font-black uppercase tracking-widest rounded-xl shadow-xl">
+                <Button onClick={handleSave} className="flex-2 py-5 bg-black text-white font-black uppercase tracking-widest rounded-xl shadow-xl">
                   {editId ? 'Update Details' : 'Onboard Partner'}
                 </Button>
               </div>

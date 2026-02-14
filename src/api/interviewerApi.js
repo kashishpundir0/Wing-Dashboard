@@ -23,6 +23,14 @@ export const updateInterviewer = async (id, payload) => {
 
 // DELETE: Remove interviewer by ID
 export const deleteInterviewer = async (id) => {
-  const response = await apiClient.delete(`/api/interviewer/${id}`);
-  return response.data;
+  try {
+    const response = await apiClient.delete(`/api/interviewer/${id}`);
+    return response.data;  // Assuming the server returns a success message or the deleted object.
+  } catch (error) {
+    //  Handle errors:  Important!
+    console.error("Delete failed:", error);
+
+    // Provide a useful error message.  Check the server response for details.
+    throw new Error(error.response?.data?.message || "Failed to delete interviewer.  Please check the ID and try again.");
+  }
 };

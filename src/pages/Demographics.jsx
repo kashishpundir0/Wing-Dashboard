@@ -58,7 +58,7 @@ const Demographics = () => {
       />
 
       {/* ROW 2: Age & Occupation */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+      <div className="grid grid-cols-1 p-6 lg:grid-cols-2 gap-6 items-stretch">
         <AgeDistribution ageData={ageData} />
 
         <div className="flex flex-col gap-6">

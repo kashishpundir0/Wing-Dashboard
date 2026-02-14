@@ -103,7 +103,7 @@ const Interviewers = () => {
                 <div className="w-14 h-14 bg-[#1F1F2E] rounded-2xl flex items-center justify-center text-white font-bold text-xl mb-5">{person.name?.[0]}</div>
                 <h3 className="font-bold text-[#1F1F2E] text-lg uppercase mb-4">{person.name}</h3>
 
-                <div className="space-y-3 flex-grow">
+                <div className="space-y-3 grow">
                   <div className="flex items-center gap-3 text-slate-500 text-[10px] font-bold uppercase tracking-widest">
                     <Mail size={14} className="text-[#1F1F2E]" /> {person.email || person.generatedCredentials?.email || "N/A"}
                   </div>
@@ -130,7 +130,7 @@ const Interviewers = () => {
       )}
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#1F1F2E]/40 backdrop-blur-md">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-[#1F1F2E]/40 backdrop-blur-md">
           <WingmatesSignUp onClose={() => setIsModalOpen(false)} refreshData={fetchInterviewers} initialData={selectedInterviewer} />
         </div>
       )}

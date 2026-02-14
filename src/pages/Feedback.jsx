@@ -97,9 +97,9 @@ const Feedback = () => {
         </div>
 
         <div className="flex flex-wrap gap-4">
-          <StatCard label="Total Responses" value={stats?.totalResponses || 0} icon={MessageSquare} trend="+0%" />
-          <StatCard label="Avg. Rating" value={stats?.avgRating?.toFixed(1) || 0} icon={Star} trend="+0.0" />
-          <StatCard label="Positive Sentiment" value={`${stats?.positivePercent || 0}%`} icon={TrendingUp} trend="+0%" />
+          <StatCard label="Total Responses" value={stats?.totalResponses || 0} icon={MessageSquare} />
+          <StatCard label="Avg. Rating" value={stats?.avgRating?.toFixed(1) || 0} icon={Star} />
+          <StatCard label="Positive Sentiment" value={`${stats?.positivePercent || 0}%`} icon={TrendingUp} />
         </div>
       </div>
 
@@ -131,7 +131,7 @@ const Feedback = () => {
       </div>
 
       {/* 3. Feedback List */}
-      <div className="relative min-h-[400px]">
+      <div className="relative min-h-100">
         {loading ? (
           <div className="absolute inset-0 flex items-center justify-center bg-white/50 z-10">
             <Loader2 className="animate-spin text-slate-900" size={32} />
@@ -146,7 +146,7 @@ const Feedback = () => {
                 <div className="flex flex-col md:flex-row justify-between gap-6">
 
                   {/* User Info & Rating */}
-                  <div className="flex gap-4 min-w-[240px]">
+                  <div className="flex gap-4 min-w-60">
                     <div className="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center font-black shrink-0 border border-slate-200 uppercase">
                       {item.name[0]}
                     </div>
@@ -175,7 +175,7 @@ const Feedback = () => {
                   </div>
 
                   {/* Date & Actions */}
-                  <div className="flex md:flex-col justify-between items-end min-w-[120px]">
+                  <div className="flex md:flex-col justify-between items-end min-w-30">
                     <div className="flex items-center gap-2 text-slate-400">
                       <Calendar size={12} />
                       <span className="text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
@@ -252,7 +252,7 @@ const Feedback = () => {
 };
 
 const StatCard = ({ label, value, icon: Icon, trend }) => (
-  <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl min-w-[160px]">
+  <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl min-w-40">
     <div className="flex justify-between items-start mb-2">
       <Icon size={16} className="text-slate-400" />
       <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded flex items-center">

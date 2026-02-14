@@ -97,7 +97,7 @@ const Availability = () => {
 
   return (
     <div className="w-full -mt-8 relative p-4">
-      {loading && <div className="fixed inset-0 z-[100] flex items-center justify-center bg-white/50 backdrop-blur-sm"><Loader2 className="animate-spin text-indigo-600" size={40} /></div>}
+      {loading && <div className="fixed inset-0 z-100 flex items-center justify-center bg-white/50 backdrop-blur-sm"><Loader2 className="animate-spin text-indigo-600" size={40} /></div>}
 
       {/* Modal */}
       {isModalOpen && (

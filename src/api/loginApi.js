@@ -7,6 +7,22 @@ const apiClient = axios.create({
   },
 });
 
+// --- NEW REGISTER FUNCTION ---
+export const registerAdmin = async (userData) => {
+  try {
+    const res = await apiClient.post('/api/admin/create-admin', {
+      name: userData.name,
+      email: userData.email,
+      password: userData.password
+    });
+
+    return res.data;
+  } catch (error) {
+    const msg = error.response?.data?.message || "Registration failed. Please try again.";
+    throw new Error(msg);
+  }
+};
+
 export const loginUser = async (credentials) => {
   try {
     // 1. Try Admin Login first
@@ -18,13 +34,12 @@ export const loginUser = async (credentials) => {
 
       if (adminRes.data.success) {
         const { token, admin } = adminRes.data;
-        const name = admin.name || 'Admin'; // Fallback to 'Admin' if name is missing
+        const name = admin.name || 'Admin';
 
         localStorage.setItem('token', token);
         localStorage.setItem('userRole', 'admin');
         localStorage.setItem('userName', name);
 
-        // Return name directly so the component can use it immediately
         return { role: 'admin', userName: name, ...adminRes.data };
       }
     } catch (adminError) {

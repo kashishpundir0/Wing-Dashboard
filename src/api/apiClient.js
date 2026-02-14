@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: '/',
+  baseURL: '/', // MUST be '/' to trigger the Vite proxy in dev and Redirects in prod
   headers: {
     'Content-Type': 'application/json',
   },
@@ -10,8 +10,7 @@ const apiClient = axios.create({
 
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
-
-  // NEVER attach a token for login requests
+  // Logic to skip token for login
   const isLoginRequest = config.url.includes('/login');
 
   if (token && !isLoginRequest) {
