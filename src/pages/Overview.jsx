@@ -1,23 +1,36 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, AreaChart, Area, LabelList
 } from 'recharts';
-import { ArrowUpRight, Users, Calendar, MousePointer2, ClipboardCheck, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowUpRight, Users, Calendar, MousePointer2, ClipboardCheck, CheckCircle, XCircle, Filter } from 'lucide-react';
+
+// Import the API handler
+import { getVisitSummary } from '../api/overviewApi';
 
 const Overview = () => {
   const THEME_DARK = "#1F1F2E";
   const THEME_BG = "#F5F6FA";
 
-  // Data Set 1: User Acquisition Journey
-  const acquisitionData = [
-    { name: 'Visits', value: 12450, color: THEME_DARK },
-    { name: 'Signups', value: 3200, color: '#4F46E5' },
-    { name: 'Interviews', value: 450, color: '#94A3B8' },
-    { name: 'Dates', value: 2050, color: '#CBD5E1' },
+  // 1. State for API data and Loading
+  const [totalVisitors, setTotalVisitors] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  // 2. Date Range States (Default: Last 7 days)
+  const [startDate, setStartDate] = useState(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
+
+  // 3. Traffic Graph Data (Time-based peak visitors)
+  const trafficTrendData = [
+    { time: 'Mon', visits: 2400 },
+    { time: 'Tue', visits: 1398 },
+    { time: 'Wed', visits: 9800 },
+    { time: 'Thu', visits: 3908 },
+    { time: 'Fri', visits: 4800 },
+    { time: 'Sat', visits: 3800 },
+    { time: 'Sun', visits: 4300 },
   ];
 
-  // Data Set 2: The Interview Pipeline (Workflow progression)
   const pipelineData = [
     { stage: 'Scheduled', count: 450 },
     { stage: 'Completed', count: 380 },
@@ -25,7 +38,32 @@ const Overview = () => {
     { stage: 'Rejected', count: 260 },
   ];
 
-  // Data Set 3: Success vs Rejection
+  // Fetch data whenever dates change
+  useEffect(() => {
+    const fetchStats = async () => {
+      setLoading(true);
+      try {
+        // Assuming getVisitSummary handles (startDate, endDate) params
+        const data = await getVisitSummary(startDate, endDate);
+        if (data.success) {
+          setTotalVisitors(data.totalUniqueVisitors);
+        }
+      } catch (error) {
+        console.error("Failed to load statistics");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, [startDate, endDate]);
+
+  const acquisitionData = [
+    { name: 'Visits', value: totalVisitors, color: THEME_DARK },
+    { name: 'Signups', value: 3200, color: '#4F46E5' },
+    { name: 'Interviews', value: 450, color: '#94A3B8' },
+    { name: 'Dates', value: 2050, color: '#CBD5E1' },
+  ];
+
   const outcomeData = [
     { name: 'Accepted', value: 120, fill: THEME_DARK },
     { name: 'Rejected', value: 260, fill: '#E2E8F0' },
@@ -47,7 +85,9 @@ const Overview = () => {
       </div>
       <div>
         <h3 className={`text-[11px] font-bold uppercase tracking-[0.2em] mb-1 opacity-60`}>{title}</h3>
-        <p className="text-4xl font-black tracking-tight">{value}</p>
+        <p className="text-4xl font-black tracking-tight">
+          {loading ? "..." : value.toLocaleString()}
+        </p>
         <p className={`text-[10px] mt-2 font-bold uppercase tracking-widest opacity-40`}>{subtext}</p>
       </div>
     </div>
@@ -56,17 +96,49 @@ const Overview = () => {
   return (
     <div className="min-h-screen bg-[#F5F6FA] w-full md:p-10 space-y-10 overflow-x-hidden">
 
+      {/* HEADER & DATE RANGE FILTER */}
+      <div className="flex flex-col md:flex-row justify-between items-center gap-6 bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
+        <div>
+          <h2 className="text-2xl font-black text-[#1F1F2E] tracking-tight">Analytics Dashboard</h2>
+          <p className="text-sm text-slate-400 font-medium">Monitoring traffic between selected dates</p>
+        </div>
+
+        <div className="flex items-center gap-4 bg-[#F5F6FA] p-3 rounded-2xl border border-slate-200">
+          <div className="flex items-center gap-2 px-3 border-r border-slate-300">
+            <Filter size={16} className="text-slate-400" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Range</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="bg-transparent text-xs font-bold text-[#1F1F2E] outline-none"
+            />
+            <span className="text-slate-300 font-bold">to</span>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="bg-transparent text-xs font-bold text-[#1F1F2E] outline-none"
+            />
+          </div>
+        </div>
+      </div>
+
       {/* 1. KPI Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        <StatCard title="Total Traffic" value="12,450" icon={MousePointer2} trend="14%" subtext="Visits this month" isHero={true} />
-        <StatCard title="New Signups" value="3,200" icon={Users} trend="8%" subtext="User growth" />
-        <StatCard title="Scheduled Interviews" value="450" icon={ClipboardCheck} trend="12%" subtext="Pending sessions" />
-        <StatCard title="Dates Planned" value="2,050" icon={Calendar} trend="18%" subtext="Matchmaking success" />
+        <StatCard title="Total Traffic" value={totalVisitors} icon={MousePointer2} trend="14%" subtext="Dynamic Range Visits" isHero={true} />
+        <StatCard title="New Signups" value={3200} icon={Users} trend="8%" subtext="User growth" />
+        <StatCard title="Scheduled Interviews" value={450} icon={ClipboardCheck} trend="12%" subtext="Pending sessions" />
+        <StatCard title="Dates Planned" value={2050} icon={Calendar} trend="18%" subtext="Matchmaking success" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-        {/* 2. User Acquisition Funnel */}
+
+
+        {/* 3. User Acquisition Funnel */}
         <div className="lg:col-span-2 bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100">
           <div className="flex justify-between items-center mb-10">
             <div>
@@ -90,7 +162,8 @@ const Overview = () => {
           </div>
         </div>
 
-        {/* 3. Interview Success Ring */}
+
+        {/* 4. Interview Success Ring */}
         <div className="bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100 flex flex-col justify-between">
           <div>
             <h3 className="text-xl font-bold text-[#1F1F2E] tracking-tight">Interview Success</h3>
@@ -124,8 +197,40 @@ const Overview = () => {
             </div>
           </div>
         </div>
+        {/* 2. TRAFFIC TREND GRAPH (Replaces Pipeline) */}
+        <div className="lg:col-span-3 bg-[#1F1F2E] p-10 rounded-[3rem] shadow-2xl text-white">
+          <div className="flex justify-between items-center mb-10">
+            <div>
+              <h3 className="text-xl font-bold tracking-tight">Visitor Intensity</h3>
+              <p className="text-sm text-white/40 font-medium mt-1">Peak traffic distribution over time</p>
+            </div>
+            <div className="bg-white/10 px-4 py-2 rounded-xl border border-white/10">
+              <span className="text-[10px] font-bold uppercase tracking-widest opacity-60">Status: </span>
+              <span className="text-xs font-bold text-emerald-400">Live Updates</span>
+            </div>
+          </div>
+          <div className="h-72 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={trafficTrendData}>
+                <defs>
+                  <linearGradient id="colorTraffic" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#4F46E5" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'rgba(255,255,255,0.4)', fontWeight: 700 }} dy={10} />
+                <YAxis hide />
+                <Tooltip
+                  contentStyle={{ backgroundColor: '#1F1F2E', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '15px' }}
+                  itemStyle={{ color: '#fff', fontWeight: 'bold' }}
+                />
+                <Area type="monotone" dataKey="visits" stroke="#4F46E5" strokeWidth={4} fillOpacity={1} fill="url(#colorTraffic)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
 
-        {/* 4. The Interview Pipeline Trend (Bottom Wide Chart) */}
         <div className="lg:col-span-3 bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100">
           <div className="flex justify-between items-center mb-8">
             <div>
@@ -151,7 +256,6 @@ const Overview = () => {
             </ResponsiveContainer>
           </div>
         </div>
-
       </div>
     </div>
   );

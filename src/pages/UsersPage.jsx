@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, Filter, MoreVertical, Mail, Phone, Loader2, UserX } from 'lucide-react';
+import { Search, Filter, Mail, Phone, Loader2, UserX } from 'lucide-react';
 import { fetchUsers } from '../api/usersApi';
 
 const UsersPage = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState(''); // New State for Search
+    const [searchQuery, setSearchQuery] = useState('');
     const [pagination, setPagination] = useState({
         currentPage: 1,
         totalPages: 1,
@@ -13,11 +13,9 @@ const UsersPage = () => {
         limit: 10
     });
 
-    // Updated to accept search parameter
     const getUsersData = async (page, search = '') => {
         setLoading(true);
         try {
-            // Assuming fetchUsers(page, limit, search)
             const data = await fetchUsers(page, pagination.limit, search);
             if (data.success) {
                 setUsers(data.users);
@@ -35,12 +33,10 @@ const UsersPage = () => {
         }
     };
 
-    // Effect for Debounced Search
     useEffect(() => {
         const delayDebounceFn = setTimeout(() => {
-            // Reset to page 1 whenever search query changes
             getUsersData(1, searchQuery);
-        }, 500); // 500ms delay
+        }, 500);
 
         return () => clearTimeout(delayDebounceFn);
     }, [searchQuery]);
@@ -80,7 +76,7 @@ const UsersPage = () => {
             </div>
 
             {/* Users Table Card */}
-            <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden relative min-h-[400px]">
+            <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden relative min-h-100">
                 {loading && (
                     <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
                         <Loader2 className="animate-spin text-indigo-600" size={32} />
@@ -93,7 +89,7 @@ const UsersPage = () => {
                             <tr className="border-b border-slate-50">
                                 <th className="px-8 py-5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">User Details</th>
                                 <th className="px-6 py-5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Demographics</th>
-                                <th className="px-6 py-5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Contact</th>
+                                <th className="px-6 py-5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Contact Information</th>
                                 <th className="px-6 py-5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Joined Date</th>
                             </tr>
                         </thead>
@@ -108,7 +104,6 @@ const UsersPage = () => {
                                                 </div>
                                                 <div>
                                                     <p className="font-semibold text-slate-700">{user.name || "Unknown User"}</p>
-                                                    <p className="text-[10px] text-slate-400 font-mono">{user.email}</p>
                                                 </div>
                                             </div>
                                         </td>
@@ -121,9 +116,15 @@ const UsersPage = () => {
                                             </div>
                                         </td>
                                         <td className="px-6 py-5">
-                                            <div className="flex flex-col gap-1">
+                                            <div className="flex flex-col gap-1.5">
+                                                {/* Added Email Row */}
                                                 <div className="flex items-center gap-2 text-xs text-slate-600">
-                                                    <Phone size={12} />
+                                                    <Mail size={14} className="text-indigo-400" />
+                                                    <span className="truncate max-w-50">{user.email || 'No Email'}</span>
+                                                </div>
+                                                {/* Mobile Row */}
+                                                <div className="flex items-center gap-2 text-xs text-slate-600">
+                                                    <Phone size={14} className="text-slate-400" />
                                                     {user.mobile || 'No contact'}
                                                 </div>
                                             </div>

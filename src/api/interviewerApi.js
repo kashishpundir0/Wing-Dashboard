@@ -1,36 +1,37 @@
+// src/api/interviewerApi.js
 import apiClient from './apiClient';
 
-// GET: Fetch all interviewers
+// GET: Fetch all users and filter for interviewers
 export const getInterviewers = async () => {
-  const response = await apiClient.get('/api/interviewer/');
-  return response.data.data;
+  const response = await apiClient.get('/api/users');
+  // Check if data is inside response.data.data or response.data
+  const users = response.data.data || response.data;
+  return users.filter(user => user.role === 'interviewer');
 };
 
-// POST: Create (Requires Multipart/Form-Data for files/images)
-export const registerInterviewer = async (formData) => {
-  const response = await apiClient.post('/api/interviewer/create-interviewer', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+// GET: Specific Availability for one interviewer
+export const getInterviewerAvailability = async (id) => {
+  const response = await apiClient.get(`/api/${id}/availability`);
+  return response.data.data || response.data;
+};
+
+// POST: Create (JSON format)
+export const registerInterviewer = async (payload) => {
+  const response = await apiClient.post('/api/register/interviewer', {
+    ...payload,
+    role: "interviewer"
   });
   return response.data;
 };
 
-// PUT: Update (Your snippet shows Raw JSON passing)
+// PUT: Update Interviewer (THIS WAS MISSING)
 export const updateInterviewer = async (id, payload) => {
-  // payload is a simple object: { name: "Kashish" }
   const response = await apiClient.put(`/api/interviewer/${id}`, payload);
   return response.data;
 };
 
-// DELETE: Remove interviewer by ID
+// DELETE: Remove interviewer
 export const deleteInterviewer = async (id) => {
-  try {
-    const response = await apiClient.delete(`/api/interviewer/${id}`);
-    return response.data;  // Assuming the server returns a success message or the deleted object.
-  } catch (error) {
-    //  Handle errors:  Important!
-    console.error("Delete failed:", error);
-
-    // Provide a useful error message.  Check the server response for details.
-    throw new Error(error.response?.data?.message || "Failed to delete interviewer.  Please check the ID and try again.");
-  }
+  const response = await apiClient.delete(`/api/interviewer/${id}`);
+  return response.data;
 };
