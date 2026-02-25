@@ -1,4 +1,3 @@
-// src/api/loginApi.js
 import axios from 'axios';
 
 const apiClient = axios.create({
@@ -9,7 +8,6 @@ const apiClient = axios.create({
 });
 
 // --- REGISTER ADMIN ---
-// Ensure this has the "export" keyword
 export const registerAdmin = async (userData) => {
   try {
     const res = await apiClient.post('/api/register/admin', {
@@ -47,33 +45,26 @@ export const loginUser = async (credentials) => {
       password: credentials.password
     });
 
-    // Check if the request was successful
-    if (response.data.success || response.data.token) {
-      const resData = response.data;
+    // Postman shows structure: { "data": { "id": "...", "role": "...", "token": "..." } }
+    if (response.data && response.data.data) {
+      const loginData = response.data.data;
 
-      // 1. Extract Token
-      const token = resData.token || resData.data?.token;
-
-      // 2. Extract Role
-      const userRole = resData.role || resData.data?.role || resData.user?.role;
-
-      // 3. Extract Name
-      const userName = resData.userName || resData.data?.name || resData.user?.name || 'User';
-
-      // 4. Extract User ID (CRITICAL for fixing the /api/null error)
-      const userId = resData._id || resData.data?._id || resData.user?._id || resData.data?.user?._id;
+      const token = loginData.token;
+      const userId = loginData.id; // MATCHING POSTMAN: loginData.id
+      const userRole = loginData.role;
+      const userName = loginData.name || 'User';
 
       if (!token) {
-        throw new Error("Login successful but no token received.");
+        throw new Error("No token received from server.");
       }
 
-      // 5. Save everything to LocalStorage
+      // Save to LocalStorage
       localStorage.setItem('token', token);
       localStorage.setItem('userRole', userRole);
       localStorage.setItem('userName', userName);
 
       if (userId) {
-        localStorage.setItem('userId', userId);
+        localStorage.setItem('userId', userId); // This fixes the /api/null error
       }
 
       return {
@@ -85,7 +76,7 @@ export const loginUser = async (credentials) => {
       };
     }
 
-    throw new Error("Invalid credentials");
+    throw new Error("Invalid response format from server.");
   } catch (error) {
     const msg = error.response?.data?.message || "Authentication failed. Check your email/password.";
     throw new Error(msg);

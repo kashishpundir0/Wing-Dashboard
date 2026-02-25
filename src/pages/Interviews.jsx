@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Video, X, MapPin, CheckCircle2, Ruler,
-    Phone, Star, Calendar as CalendarIcon, Clock, Briefcase,
-    Heart, User, Layers, AlertCircle, MessageSquare,
-    ShieldCheck, Wine, Cigarette, Dumbbell, UserCheck, Filter
+    Video, X, MapPin, CheckCircle2,
+    Calendar as CalendarIcon, Clock, UserCheck, AlertCircle
 } from 'lucide-react';
+import { interviewApi } from '../api/interviewApi'; // Adjust path as needed
 
 const Toast = ({ message, type, onClose }) => {
     useEffect(() => {
@@ -23,67 +22,73 @@ const Toast = ({ message, type, onClose }) => {
 };
 
 const Interviews = () => {
+    const [bookings, setBookings] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [selectedUser, setSelectedUser] = useState(null);
     const [notification, setNotification] = useState(null);
     const [selectedDate, setSelectedDate] = useState('All');
 
-    // State for Rejection Modal
     const [rejectingUser, setRejectingUser] = useState(null);
     const [rejectionComment, setRejectionComment] = useState('');
 
     const userRole = localStorage.getItem('userRole');
-    const currentUserName = userRole === 'admin' ? null : "Sarah Jenkins";
+    const currentUserName = localStorage.getItem('userName') || "Interviewer";
 
-    const data = [
-        {
-            id: 1,
-            name: 'Jessica Parker',
-            interviewer: 'Sarah Jenkins',
-            age: 23,
-            date: '24 Jan',
-            time: '10:30 AM',
-            compatibility: '90%',
-            photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800',
-            location: 'Chicago, IL, United States',
-            jobTitle: 'Software Developer',
-            distance: '1 km',
-            aboutMe: [
-                { label: 'Bengaluru, India', icon: <MapPin size={12} /> },
-                { label: 'Regularly', icon: <Dumbbell size={12} /> },
-                { label: 'Hindu', icon: null },
-                { label: 'Occasionally', icon: <Wine size={12} /> },
-                { label: 'Rarely', icon: <Cigarette size={12} /> },
-            ],
-            story: "My name is Jessica Parker and I enjoy meeting new people and finding ways to help them have an uplifting experience. I enjoy reading..",
-            interests: [
-                { label: 'Yoga', icon: '🧘' },
-                { label: 'Film lover', icon: '🎬' },
-                { label: 'Matcha', icon: '🍵' }
-            ],
-            gallery: [
-                'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
-                'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400',
-                'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400',
-                'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400',
-                'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
-            ]
+    // Fetch data on mount
+    useEffect(() => {
+        fetchBookings();
+    }, []);
+
+    const fetchBookings = async () => {
+        try {
+            setLoading(true);
+            const response = await interviewApi.getBookings();
+            if (response.success) {
+                setBookings(response.data);
+            }
+        } catch (error) {
+            showNotify('Failed to load bookings', 'error');
+        } finally {
+            setLoading(false);
         }
-    ];
-
-    const roleFilteredData = userRole === 'admin' ? data : data.filter(item => item.interviewer === currentUserName);
-    const finalData = selectedDate === 'All' ? roleFilteredData : roleFilteredData.filter(item => item.date === selectedDate);
+    };
 
     const showNotify = (msg, type = 'success') => setNotification({ msg, type });
+
+    // Formatting date from API (e.g., 2026-02-26T00:00:00.000Z -> Feb 26)
+    const formatDate = (dateStr) => {
+        const d = new Date(dateStr);
+        return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    };
+
+    // Filter Logic
+    const filteredData = bookings.filter(item => {
+        if (selectedDate === 'All') return true;
+        return formatDate(item.date) === selectedDate;
+    });
+
+    // Get unique dates for the filter bar from the fetched data
+    const uniqueDates = ['All', ...new Set(bookings.map(item => formatDate(item.date)))];
 
     const handleConfirmReject = () => {
         if (!rejectionComment.trim()) {
             showNotify('Please provide a reason', 'error');
             return;
         }
-        showNotify(`Rejected ${rejectingUser.name}`, 'error');
+        showNotify(`Rejected ${rejectingUser.userName}`, 'error');
         setRejectingUser(null);
         setRejectionComment('');
     };
+
+    const openMeet = (link) => {
+        if (link) {
+            window.open(link, '_blank');
+        } else {
+            showNotify('Meeting link not available', 'error');
+        }
+    };
+
+    if (loading) return <div className="p-10 text-center font-bold text-slate-500">Loading pipeline...</div>;
 
     return (
         <div className="relative md:pt-4 md:pb-10 bg-slate-50/50 min-h-screen space-y-8 px-6">
@@ -101,9 +106,14 @@ const Interviews = () => {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
-                    <button onClick={() => setSelectedDate('All')} className={`px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${selectedDate === 'All' ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:text-slate-900'}`}>All</button>
-                    {['24 Jan', '25 Jan', '26 Jan'].map(date => (
-                        <button key={date} onClick={() => setSelectedDate(date)} className={`px-5 py-2 rounded-xl text-xs font-bold transition-all ${selectedDate === date ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50'}`}>{date}</button>
+                    {uniqueDates.map(date => (
+                        <button
+                            key={date}
+                            onClick={() => setSelectedDate(date)}
+                            className={`px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${selectedDate === date ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:text-slate-900'}`}
+                        >
+                            {date}
+                        </button>
                     ))}
                 </div>
             </div>
@@ -120,14 +130,17 @@ const Interviews = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                        {finalData.map((user) => (
-                            <tr key={user.id} className="group hover:bg-slate-50/50 transition-all duration-300">
-                                <td className="px-8 py-6 cursor-pointer" onClick={() => setSelectedUser(user)}>
+                        {filteredData.length > 0 ? filteredData.map((booking) => (
+                            <tr key={booking._id} className="group hover:bg-slate-50/50 transition-all duration-300">
+                                <td className="px-8 py-6 cursor-pointer" onClick={() => setSelectedUser(booking)}>
                                     <div className="flex items-center gap-4">
-                                        <img src={user.photo} className="w-14 h-14 rounded-2xl object-cover ring-2 ring-slate-100 group-hover:ring-indigo-400 transition-all" alt="" />
+                                        {/* Using a placeholder if no photo exists in API */}
+                                        <div className="w-14 h-14 rounded-2xl bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xl ring-2 ring-slate-100 group-hover:ring-indigo-400 transition-all">
+                                            {booking.userName.charAt(0)}
+                                        </div>
                                         <div>
-                                            <p className="font-bold text-slate-900 text-lg group-hover:text-indigo-600 transition-colors">{user.name}, {user.age}</p>
-                                            <p className="text-xs text-slate-400 font-medium flex items-center gap-1 mt-0.5"><MapPin size={12} /> {user.location}</p>
+                                            <p className="font-bold text-slate-900 text-lg group-hover:text-indigo-600 transition-colors">{booking.userName}</p>
+                                            <p className="text-xs text-slate-400 font-medium flex items-center gap-1 mt-0.5">{booking.userEmail}</p>
                                         </div>
                                     </div>
                                 </td>
@@ -135,7 +148,7 @@ const Interviews = () => {
                                     <td className="px-8 py-6">
                                         <div className="flex items-center gap-3 bg-blue-50/50 w-fit px-4 py-2 rounded-xl border border-blue-100">
                                             <UserCheck size={16} className="text-blue-600" />
-                                            <span className="text-sm font-bold text-blue-900">{user.interviewer}</span>
+                                            <span className="text-sm font-bold text-blue-900">ID: {booking.interviewer?._id?.slice(-6)}</span>
                                         </div>
                                     </td>
                                 )}
@@ -143,19 +156,22 @@ const Interviews = () => {
                                     <div className="flex items-center gap-3">
                                         <CalendarIcon size={16} className="text-indigo-500" />
                                         <div>
-                                            <p className="text-sm font-bold text-slate-700">{user.date}</p>
-                                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{user.time}</p>
+                                            <p className="text-sm font-bold text-slate-700">{formatDate(booking.date)}</p>
+                                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{booking.time}</p>
                                         </div>
                                     </div>
                                 </td>
                                 <td className="px-8 py-6 text-right">
                                     <div className="flex justify-end gap-2.5">
-                                        <button onClick={() => showNotify('Joining Video...')} className="p-3 bg-indigo-600 text-white rounded-xl shadow-lg shadow-indigo-100 hover:-translate-y-0.5 transition-all">
+                                        <button
+                                            onClick={() => openMeet(booking.meetLink)}
+                                            className="p-3 bg-indigo-600 text-white rounded-xl shadow-lg shadow-indigo-100 hover:-translate-y-0.5 transition-all"
+                                            title="Join Meeting"
+                                        >
                                             <Video size={18} />
                                         </button>
 
-                                        {/* Restored Reject Button */}
-                                        <button onClick={() => setRejectingUser(user)} className="px-5 py-2.5 rounded-xl border border-rose-200 text-rose-600 font-bold text-xs hover:bg-rose-500 hover:text-white transition-all">
+                                        <button onClick={() => setRejectingUser(booking)} className="px-5 py-2.5 rounded-xl border border-rose-200 text-rose-600 font-bold text-xs hover:bg-rose-500 hover:text-white transition-all">
                                             Reject
                                         </button>
 
@@ -165,20 +181,26 @@ const Interviews = () => {
                                     </div>
                                 </td>
                             </tr>
-                        ))}
+                        )) : (
+                            <tr>
+                                <td colSpan={userRole === 'admin' ? 4 : 3} className="px-8 py-10 text-center text-slate-400 font-medium">
+                                    No bookings found for this criteria.
+                                </td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>
 
-            {/* Restored Rejection Box (Modal) */}
+            {/* Rejection Modal */}
             {rejectingUser && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-200 flex items-center justify-center p-4">
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
                     <div className="bg-white w-full max-w-md rounded-4xl p-8 shadow-2xl border border-rose-50 animate-in fade-in zoom-in-95 duration-300">
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-xl font-black text-slate-900">Rejection Reason</h3>
                             <button onClick={() => setRejectingUser(null)}><X size={20} className="text-slate-400" /></button>
                         </div>
-                        <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-4">Rejecting: {rejectingUser.name}</p>
+                        <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-4">Rejecting: {rejectingUser.userName}</p>
                         <textarea
                             autoFocus
                             value={rejectionComment}
@@ -189,89 +211,6 @@ const Interviews = () => {
                         <div className="grid grid-cols-2 gap-4 mt-6">
                             <button onClick={() => setRejectingUser(null)} className="py-4 rounded-2xl bg-slate-50 text-slate-500 font-bold text-xs uppercase hover:bg-slate-100 transition-colors">Cancel</button>
                             <button onClick={handleConfirmReject} className="py-4 rounded-2xl bg-rose-600 text-white font-bold text-xs uppercase shadow-lg shadow-rose-100 hover:bg-rose-700 transition-all">Reject</button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Profile Review Modal */}
-            {selectedUser && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-100 flex items-center justify-center p-4">
-                    <div className="bg-white w-full max-w-5xl rounded-[3rem] overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-500 max-h-[92vh] flex flex-col md:flex-row border border-slate-100">
-
-                        <div className="w-full md:w-1/2 relative bg-slate-200">
-                            <img src={selectedUser.photo} className="absolute inset-0 w-full h-full object-cover" alt="" />
-                            <div className="absolute top-8 left-8 bg-white px-5 py-2 rounded-full shadow-lg border border-slate-100">
-                                <span className="text-[10px] font-black text-slate-800 uppercase tracking-widest">{selectedUser.compatibility} Compatible</span>
-                            </div>
-                            <button onClick={() => setSelectedUser(null)} className="absolute top-8 right-8 p-3 bg-white/20 backdrop-blur-md rounded-2xl text-white hover:bg-white/40 transition-all z-20">
-                                <X size={20} />
-                            </button>
-                        </div>
-
-                        <div className="w-full md:w-1/2 bg-white overflow-y-auto custom-scrollbar flex flex-col">
-                            <div className="p-10 md:p-14 space-y-10">
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <h2 className="text-3xl font-black text-slate-900 leading-tight">{selectedUser.name}, {selectedUser.age}</h2>
-                                        <p className="text-slate-400 font-bold text-sm">{selectedUser.jobTitle}</p>
-                                    </div>
-                                    <button className="p-4 border border-slate-100 rounded-full text-slate-400 hover:bg-slate-50 transition-all">
-                                        <Phone size={24} />
-                                    </button>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Location</h4>
-                                    <div className="flex justify-between items-center">
-                                        <p className="text-slate-600 font-bold text-sm">{selectedUser.location}</p>
-                                        <span className="bg-indigo-50 text-indigo-600 px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider">{selectedUser.distance}</span>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">About me</h4>
-                                    <div className="flex flex-wrap gap-2">
-                                        {selectedUser.aboutMe.map((item, idx) => (
-                                            <div key={idx} className="flex items-center gap-2 bg-slate-50 border border-slate-100 px-4 py-2.5 rounded-full text-slate-600 text-xs font-bold">
-                                                {item.icon} {item.label}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">My Story</h4>
-                                    <p className="text-slate-600 leading-relaxed font-medium">
-                                        {selectedUser.story}
-                                        <button className="text-indigo-600 font-black ml-1 text-xs uppercase tracking-tighter">Read more</button>
-                                    </p>
-                                </div>
-
-                                <div className="space-y-4 pb-4">
-                                    <div className="flex justify-between items-center">
-                                        <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Gallery</h4>
-                                        <button className="text-indigo-600 font-black text-[10px] uppercase tracking-widest">See all</button>
-                                    </div>
-                                    <div className="space-y-3">
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <img src={selectedUser.gallery[0]} className="w-full h-48 object-cover rounded-3xl" alt="" />
-                                            <img src={selectedUser.gallery[1]} className="w-full h-48 object-cover rounded-3xl" alt="" />
-                                        </div>
-                                        <div className="grid grid-cols-3 gap-3">
-                                            <img src={selectedUser.gallery[2]} className="w-full h-28 object-cover rounded-2xl" alt="" />
-                                            <img src={selectedUser.gallery[3]} className="w-full h-28 object-cover rounded-2xl" alt="" />
-                                            <img src={selectedUser.gallery[4]} className="w-full h-28 object-cover rounded-2xl" alt="" />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="pt-4">
-                                    <button className="w-full py-5 bg-[#6438A8] text-white rounded-2xl font-black uppercase text-xs tracking-[0.2em] shadow-xl shadow-indigo-100 hover:-translate-y-1 transition-all">
-                                        Request For A Date
-                                    </button>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
