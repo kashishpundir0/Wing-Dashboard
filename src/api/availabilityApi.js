@@ -12,4 +12,7 @@ export const availabilityApi = {
 
     deleteDayByDate: (interviewerId, date) =>
         apiClient.delete(`/api/${interviewerId}/availability/${date}`),
+
+    // Fetch all users to filter for the dropdown
+    getUsers: () => apiClient.get('/api/users'),
 };

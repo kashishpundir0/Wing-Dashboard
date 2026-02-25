@@ -146,7 +146,7 @@ const Availability = () => {
 
       {/* CUSTOM BUILDER MODAL */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-md">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md">
           <div className="bg-white w-full max-w-4xl rounded-[2.5rem] p-10 shadow-2xl animate-in zoom-in-95 max-h-[90vh] flex flex-col">
 
             <div className="flex justify-between items-center mb-8 shrink-0">
@@ -190,7 +190,7 @@ const Availability = () => {
 
                 <div className="flex-1 overflow-y-auto pr-4 space-y-3 custom-scrollbar">
                   {Object.keys(stagedSlots).length === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center border border-dashed rounded-[2rem] text-slate-400">
+                    <div className="h-full flex flex-col items-center justify-center border border-dashed rounded-4xl text-slate-400">
                       <CalendarIcon size={32} className="mb-2 opacity-20" />
                       <p className="text-[9px] font-bold uppercase">No dates generated yet</p>
                     </div>

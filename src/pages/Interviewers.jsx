@@ -72,7 +72,7 @@ const Interviewers = () => {
       )}
 
       {isSignUpOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-md p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/40 backdrop-blur-md p-4">
           <WingmatesSignUp onClose={() => setIsSignUpOpen(false)} refreshData={fetchList} />
         </div>
       )}
@@ -86,7 +86,7 @@ const Interviewers = () => {
       />
 
       {fetchingAvail && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-white/40 backdrop-blur-sm">
+        <div className="fixed inset-0 z-200 flex items-center justify-center bg-white/40 backdrop-blur-sm">
           <Loader2 className="animate-spin text-black" size={40} />
         </div>
       )}

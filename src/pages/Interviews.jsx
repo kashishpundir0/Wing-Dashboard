@@ -194,7 +194,7 @@ const Interviews = () => {
 
             {/* Rejection Modal */}
             {rejectingUser && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-200 flex items-center justify-center p-4">
                     <div className="bg-white w-full max-w-md rounded-4xl p-8 shadow-2xl border border-rose-50 animate-in fade-in zoom-in-95 duration-300">
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-xl font-black text-slate-900">Rejection Reason</h3>
