@@ -1,2 +1,3 @@
-/api/*  https://wingmann.online/api/api/:splat  200
+/api
+/*  https://api.wingmann.online/:splat  200!
 /*      /index.html                            200

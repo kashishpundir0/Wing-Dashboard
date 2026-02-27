@@ -1,22 +1,12 @@
-// src/api/usersApi.js
 import apiClient from './apiClient';
 
 /**
- * Fetch paginated user data with optional search
- * @param {number} page - Current page number
- * @param {number} limit - Items per page
- * @param {string} search - Search query string
+ * Fetch all users from the system
  */
-export const fetchUsers = async (page = 1, limit = 10, search = '') => {
+export const fetchUsers = async () => {
     try {
-        const response = await apiClient.get(`/api/userData/user-summary`, {
-            // Add search to the params object so it's sent as a query string (?search=...)
-            params: {
-                page,
-                limit,
-                search
-            },
-        });
+        // Matches your provided URL: {{Base_url}}/api/users
+        const response = await apiClient.get('/api/users');
         return response.data;
     } catch (error) {
         console.error("Error fetching users:", error);

@@ -18,18 +18,21 @@ export const interviewApi = {
     },
 
     /**
+     * Fetch full interview/user details
+     */
+    getInterviewDetail: async (id) => {
+        const response = await apiClient.get(`/api/interview-detail/${id}`);
+        return response.data;
+    },
+
+    /**
      * Update Booking Status (Accept/Reject)
-     * @param {string} id - Booking ID
-     * @param {string} status - 'accepted' or 'rejected'
-     * @param {string} rejectionReason - Mandatory if status is 'rejected'
      */
     updateBookingStatus: async (id, status, rejectionReason = "") => {
         const payload = { status };
         if (status === 'rejected') {
             payload.rejectionReason = rejectionReason;
         }
-
-        // Using the endpoint from your screenshot: PUT /api/interview-change-status/:id
         const response = await apiClient.put(`/api/interview-change-status/${id}`, payload);
         return response.data;
     }

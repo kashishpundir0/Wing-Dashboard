@@ -1,30 +1,24 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Search, Filter, Mail, Phone, Loader2, UserX } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Mail, Phone, Loader2, UserX, MapPin, Calendar, Smartphone } from 'lucide-react';
 import { fetchUsers } from '../api/usersApi';
 
 const UsersPage = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [pagination, setPagination] = useState({
-        currentPage: 1,
-        totalPages: 1,
-        totalUsers: 0,
-        limit: 10
-    });
 
-    const getUsersData = async (page, search = '') => {
+    useEffect(() => {
+        getUsersData();
+    }, []);
+
+    const getUsersData = async () => {
         setLoading(true);
         try {
-            const data = await fetchUsers(page, pagination.limit, search);
-            if (data.success) {
-                setUsers(data.users);
-                setPagination(prev => ({
-                    ...prev,
-                    currentPage: data.page,
-                    totalPages: data.totalPages,
-                    totalUsers: data.totalUsers
-                }));
+            const response = await fetchUsers();
+            if (response.success) {
+                // FILTER: Only show users with the role "user"
+                const onlyUsers = response.data.filter(u => u.role === 'user');
+                setUsers(onlyUsers);
             }
         } catch (error) {
             console.error("Failed to load users");
@@ -33,52 +27,49 @@ const UsersPage = () => {
         }
     };
 
-    useEffect(() => {
-        const delayDebounceFn = setTimeout(() => {
-            getUsersData(1, searchQuery);
-        }, 500);
-
-        return () => clearTimeout(delayDebounceFn);
-    }, [searchQuery]);
-
-    const handlePageChange = (newPage) => {
-        if (newPage >= 1 && newPage <= pagination.totalPages) {
-            getUsersData(newPage, searchQuery);
-        }
+    // Age Calculation
+    const calculateAge = (dob) => {
+        if (!dob) return "N/A";
+        const birthDate = new Date(dob);
+        const difference = Date.now() - birthDate.getTime();
+        const ageDate = new Date(difference);
+        return Math.abs(ageDate.getUTCFullYear() - 1970);
     };
 
+    // Search Filter logic (Search by name, email, or phone)
+    const filteredUsers = users.filter(user =>
+        user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.mobile?.includes(searchQuery)
+    );
+
     return (
-        <div className="space-y-6">
-            {/* Header Section */}
+        <div className="space-y-6 font-sans">
+            {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-800">User Management</h1>
-                    <p className="text-sm text-slate-500">
-                        {searchQuery ? `Found ${pagination.totalUsers} results for "${searchQuery}"` : `Manage and view all ${pagination.totalUsers} registered platform users`}
+                    <h1 className="text-3xl font-black text-slate-900 tracking-tight">User Management</h1>
+                    <p className="text-sm text-slate-500 font-medium">
+                        Detailed overview of all platform <span className="text-indigo-600 font-bold">Candidates</span>
                     </p>
                 </div>
 
-                <div className="flex items-center gap-3">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                        <input
-                            type="text"
-                            placeholder="Search by name, email or mobile..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 w-64 transition-all"
-                        />
-                    </div>
-                    <button className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50">
-                        <Filter size={20} />
-                    </button>
+                <div className="relative">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <input
+                        type="text"
+                        placeholder="Search by name, email or ph..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/10 w-72 transition-all font-semibold"
+                    />
                 </div>
             </div>
 
-            {/* Users Table Card */}
-            <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden relative min-h-100">
+            {/* Table Card */}
+            <div className="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative">
                 {loading && (
-                    <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-10 flex items-center justify-center">
                         <Loader2 className="animate-spin text-indigo-600" size={32} />
                     </div>
                 )}
@@ -86,65 +77,94 @@ const UsersPage = () => {
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="border-b border-slate-50">
-                                <th className="px-8 py-5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">User Details</th>
-                                <th className="px-6 py-5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Demographics</th>
-                                <th className="px-6 py-5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Contact Information</th>
-                                <th className="px-6 py-5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Joined Date</th>
+                            <tr className="bg-slate-50/50 border-b border-slate-100">
+                                <th className="px-8 py-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Profile</th>
+                                <th className="px-6 py-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Demographics</th>
+                                <th className="px-6 py-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Contact Details</th>
+                                <th className="px-6 py-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Bio / Joined</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
-                            {users.length > 0 ? (
-                                users.map((user) => (
-                                    <tr key={user._id} className="hover:bg-slate-50/50 transition-colors group">
-                                        <td className="px-8 py-5">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">
-                                                    {user.name ? user.name.charAt(0).toUpperCase() : '?'}
+                            {filteredUsers.length > 0 ? (
+                                filteredUsers.map((user) => (
+                                    <tr key={user._id} className="hover:bg-slate-50/50 transition-all">
+                                        {/* Profile Column */}
+                                        <td className="px-8 py-6">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-12 h-12 rounded-2xl overflow-hidden bg-indigo-50 border-2 border-white shadow-sm shrink-0">
+                                                    {user.photos?.[0] ? (
+                                                        <img src={user.photos[0]} alt="" className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-indigo-600 font-black">
+                                                            {user.name?.charAt(0)}
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                <div>
-                                                    <p className="font-semibold text-slate-700">{user.name || "Unknown User"}</p>
-                                                </div>
+                                                <p className="font-bold text-slate-800 text-base">{user.name}</p>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-5">
-                                            <div className="flex flex-col">
-                                                <span className="text-sm text-slate-600 font-medium capitalize">
-                                                    {user.gender || 'N/A'}, {user.age ? `${user.age} yrs` : 'Age N/A'}
+
+                                        {/* Demographics Column */}
+                                        <td className="px-6 py-6">
+                                            <div className="flex flex-col gap-1">
+                                                <span className="text-sm text-slate-700 font-bold">
+                                                    {user.gender || 'N/A'} • {calculateAge(user.DOB)} yrs
                                                 </span>
-                                                <span className="text-xs text-slate-400">{user.state || 'No State'}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-5">
-                                            <div className="flex flex-col gap-1.5">
-                                                {/* Added Email Row */}
-                                                <div className="flex items-center gap-2 text-xs text-slate-600">
-                                                    <Mail size={14} className="text-indigo-400" />
-                                                    <span className="truncate max-w-50">{user.email || 'No Email'}</span>
-                                                </div>
-                                                {/* Mobile Row */}
-                                                <div className="flex items-center gap-2 text-xs text-slate-600">
-                                                    <Phone size={14} className="text-slate-400" />
-                                                    {user.mobile || 'No contact'}
+                                                <div className="flex items-center gap-1 text-slate-400">
+                                                    <MapPin size={12} />
+                                                    <span className="text-[10px] font-bold uppercase tracking-tighter">
+                                                        {user.state || 'Location N/A'}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-5">
-                                            <span className="text-sm text-slate-600">
-                                                {new Date(user.createdAt).toLocaleDateString('en-US', {
-                                                    month: 'short', day: 'numeric', year: 'numeric'
-                                                })}
-                                            </span>
+
+                                        {/* Contact Details Column (EMAIL AND PHONE) */}
+                                        <td className="px-6 py-6">
+                                            <div className="flex flex-col gap-2">
+                                                {/* Email Row */}
+                                                <div className="flex items-center gap-2.5 group/contact">
+                                                    <div className="p-1.5 bg-indigo-50 rounded-lg text-indigo-500 group-hover/contact:bg-indigo-600 group-hover/contact:text-white transition-colors">
+                                                        <Mail size={12} />
+                                                    </div>
+                                                    <span className="text-xs font-semibold text-slate-600">{user.email || 'No email'}</span>
+                                                </div>
+
+                                                {/* Phone Row */}
+                                                <div className="flex items-center gap-2.5 group/contact">
+                                                    <div className="p-1.5 bg-emerald-50 rounded-lg text-emerald-500 group-hover/contact:bg-emerald-600 group-hover/contact:text-white transition-colors">
+                                                        <Smartphone size={12} />
+                                                    </div>
+                                                    <span className="text-xs font-bold text-slate-700">
+                                                        {user.mobile || user.phone || '+91 ————————'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        {/* Bio / Joined Column */}
+                                        <td className="px-6 py-6">
+                                            <div className="max-w-xs space-y-2">
+                                                <p className="text-[11px] text-slate-400 line-clamp-1 italic">
+                                                    "{user.story || 'No bio available'}"
+                                                </p>
+                                                <div className="flex items-center gap-2 text-slate-400">
+                                                    <Calendar size={12} />
+                                                    <span className="text-[10px] font-black uppercase tracking-widest">
+                                                        {new Date(user.createdAt).toLocaleDateString()}
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 !loading && (
                                     <tr>
-                                        <td colSpan="4" className="py-20 text-center">
-                                            <div className="flex flex-col items-center gap-2 text-slate-400">
-                                                <UserX size={40} strokeWidth={1.5} />
-                                                <p>No users found matching "{searchQuery}"</p>
+                                        <td colSpan="4" className="py-24 text-center">
+                                            <div className="flex flex-col items-center gap-3 text-slate-300">
+                                                <UserX size={48} strokeWidth={1} />
+                                                <p className="text-xs font-black uppercase tracking-widest">No users found</p>
                                             </div>
                                         </td>
                                     </tr>
@@ -154,38 +174,15 @@ const UsersPage = () => {
                     </table>
                 </div>
 
-                {/* Pagination Footer */}
-                {users.length > 0 && (
-                    <div className="px-8 py-5 bg-slate-50/30 border-t border-slate-50 flex items-center justify-between">
-                        <p className="text-xs text-slate-500">
-                            Showing {users.length} of {pagination.totalUsers} users
-                        </p>
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => handlePageChange(pagination.currentPage - 1)}
-                                disabled={pagination.currentPage === 1}
-                                className="px-4 py-2 text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-50"
-                            >
-                                Previous
-                            </button>
-
-                            <div className="flex items-center gap-1">
-                                <span className="px-4 py-2 text-xs font-bold bg-white shadow-sm border border-slate-200 rounded-lg text-indigo-600">
-                                    {pagination.currentPage}
-                                </span>
-                                <span className="text-xs text-slate-400 px-2">of {pagination.totalPages}</span>
-                            </div>
-
-                            <button
-                                onClick={() => handlePageChange(pagination.currentPage + 1)}
-                                disabled={pagination.currentPage === pagination.totalPages}
-                                className="px-4 py-2 text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-50"
-                            >
-                                Next
-                            </button>
-                        </div>
-                    </div>
-                )}
+                {/* Status Footer */}
+                <div className="px-8 py-5 bg-slate-50/50 border-t border-slate-100 flex justify-between items-center">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        Role Filter: Candidates Only
+                    </p>
+                    <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">
+                        Total Users: {filteredUsers.length}
+                    </p>
+                </div>
             </div>
         </div>
     );
