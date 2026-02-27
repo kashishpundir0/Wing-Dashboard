@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Video, X, MapPin, CheckCircle2,
-    Calendar as CalendarIcon, Clock, UserCheck, AlertCircle
+    Video, X, CheckCircle2,
+    Calendar as CalendarIcon, UserCheck, AlertCircle, Loader2
 } from 'lucide-react';
-import { interviewApi } from '../api/interviewApi'; // Adjust path as needed
+import { interviewApi } from '../api/interviewApi';
 
 const Toast = ({ message, type, onClose }) => {
     useEffect(() => {
@@ -12,7 +12,7 @@ const Toast = ({ message, type, onClose }) => {
     }, [onClose]);
 
     return (
-        <div className="fixed top-10 right-10 z-150 animate-in slide-in-from-right-10 duration-300">
+        <div className="fixed top-10 right-10 z-[100] animate-in slide-in-from-right-10 duration-300">
             <div className={`flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border ${type === 'success' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' : 'bg-rose-50 border-rose-100 text-rose-700'}`}>
                 {type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
                 <p className="font-bold text-sm">{message}</p>
@@ -24,7 +24,7 @@ const Toast = ({ message, type, onClose }) => {
 const Interviews = () => {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [selectedUser, setSelectedUser] = useState(null);
+    const [actionLoading, setActionLoading] = useState(false);
     const [notification, setNotification] = useState(null);
     const [selectedDate, setSelectedDate] = useState('All');
 
@@ -34,7 +34,6 @@ const Interviews = () => {
     const userRole = localStorage.getItem('userRole');
     const currentUserName = localStorage.getItem('userName') || "Interviewer";
 
-    // Fetch data on mount
     useEffect(() => {
         fetchBookings();
     }, []);
@@ -44,7 +43,8 @@ const Interviews = () => {
             setLoading(true);
             const response = await interviewApi.getBookings();
             if (response.success) {
-                setBookings(response.data);
+                // Assuming response structure is { success: true, data: [...] }
+                setBookings(response.data || []);
             }
         } catch (error) {
             showNotify('Failed to load bookings', 'error');
@@ -55,37 +55,60 @@ const Interviews = () => {
 
     const showNotify = (msg, type = 'success') => setNotification({ msg, type });
 
-    // Formatting date from API (e.g., 2026-02-26T00:00:00.000Z -> Feb 26)
     const formatDate = (dateStr) => {
         const d = new Date(dateStr);
         return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
     };
 
-    // Filter Logic
     const filteredData = bookings.filter(item => {
         if (selectedDate === 'All') return true;
         return formatDate(item.date) === selectedDate;
     });
 
-    // Get unique dates for the filter bar from the fetched data
     const uniqueDates = ['All', ...new Set(bookings.map(item => formatDate(item.date)))];
 
-    const handleConfirmReject = () => {
+    // --- API ACTION: APPROVE ---
+    const handleApprove = async (id) => {
+        try {
+            setActionLoading(true);
+            const res = await interviewApi.updateBookingStatus(id, 'accepted');
+            if (res.success) {
+                showNotify('Interview Approved successfully', 'success');
+                fetchBookings(); // Refresh list
+            }
+        } catch (error) {
+            showNotify(error.message || 'Approval failed', 'error');
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    // --- API ACTION: REJECT ---
+    const handleConfirmReject = async () => {
         if (!rejectionComment.trim()) {
-            showNotify('Please provide a reason', 'error');
+            showNotify('Please provide a reason for rejection', 'error');
             return;
         }
-        showNotify(`Rejected ${rejectingUser.userName}`, 'error');
-        setRejectingUser(null);
-        setRejectionComment('');
+
+        try {
+            setActionLoading(true);
+            const res = await interviewApi.updateBookingStatus(rejectingUser._id, 'rejected', rejectionComment);
+            if (res.success) {
+                showNotify(`Rejected ${rejectingUser.userName}`, 'success');
+                setRejectingUser(null);
+                setRejectionComment('');
+                fetchBookings(); // Refresh list
+            }
+        } catch (error) {
+            showNotify(error.message || 'Rejection failed', 'error');
+        } finally {
+            setActionLoading(false);
+        }
     };
 
     const openMeet = (link) => {
-        if (link) {
-            window.open(link, '_blank');
-        } else {
-            showNotify('Meeting link not available', 'error');
-        }
+        if (link) { window.open(link, '_blank'); }
+        else { showNotify('Meeting link not available', 'error'); }
     };
 
     if (loading) return <div className="p-10 text-center font-bold text-slate-500">Loading pipeline...</div>;
@@ -124,34 +147,25 @@ const Interviews = () => {
                     <thead className="bg-slate-50/80 border-b border-slate-200">
                         <tr>
                             <th className="px-8 py-5 text-[11px] font-black text-slate-500 uppercase tracking-widest">Candidate</th>
-                            {userRole === 'admin' && <th className="px-8 py-5 text-[11px] font-black text-slate-500 uppercase tracking-widest">Interviewer</th>}
                             <th className="px-8 py-5 text-[11px] font-black text-slate-500 uppercase tracking-widest">Schedule</th>
+                            <th className="px-8 py-5 text-[11px] font-black text-slate-500 uppercase tracking-widest">Status</th>
                             <th className="px-8 py-5 text-[11px] font-black text-slate-500 uppercase tracking-widest text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                         {filteredData.length > 0 ? filteredData.map((booking) => (
                             <tr key={booking._id} className="group hover:bg-slate-50/50 transition-all duration-300">
-                                <td className="px-8 py-6 cursor-pointer" onClick={() => setSelectedUser(booking)}>
+                                <td className="px-8 py-6">
                                     <div className="flex items-center gap-4">
-                                        {/* Using a placeholder if no photo exists in API */}
-                                        <div className="w-14 h-14 rounded-2xl bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xl ring-2 ring-slate-100 group-hover:ring-indigo-400 transition-all">
+                                        <div className="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-lg">
                                             {booking.userName.charAt(0)}
                                         </div>
                                         <div>
-                                            <p className="font-bold text-slate-900 text-lg group-hover:text-indigo-600 transition-colors">{booking.userName}</p>
-                                            <p className="text-xs text-slate-400 font-medium flex items-center gap-1 mt-0.5">{booking.userEmail}</p>
+                                            <p className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{booking.userName}</p>
+                                            <p className="text-[10px] text-slate-400 font-medium uppercase">{booking.userEmail}</p>
                                         </div>
                                     </div>
                                 </td>
-                                {userRole === 'admin' && (
-                                    <td className="px-8 py-6">
-                                        <div className="flex items-center gap-3 bg-blue-50/50 w-fit px-4 py-2 rounded-xl border border-blue-100">
-                                            <UserCheck size={16} className="text-blue-600" />
-                                            <span className="text-sm font-bold text-blue-900">ID: {booking.interviewer?._id?.slice(-6)}</span>
-                                        </div>
-                                    </td>
-                                )}
                                 <td className="px-8 py-6">
                                     <div className="flex items-center gap-3">
                                         <CalendarIcon size={16} className="text-indigo-500" />
@@ -161,30 +175,46 @@ const Interviews = () => {
                                         </div>
                                     </div>
                                 </td>
+                                <td className="px-8 py-6">
+                                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${booking.status === 'accepted' ? 'bg-emerald-100 text-emerald-700' :
+                                            booking.status === 'rejected' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'
+                                        }`}>
+                                        {booking.status || 'pending'}
+                                    </span>
+                                </td>
                                 <td className="px-8 py-6 text-right">
                                     <div className="flex justify-end gap-2.5">
                                         <button
                                             onClick={() => openMeet(booking.meetLink)}
-                                            className="p-3 bg-indigo-600 text-white rounded-xl shadow-lg shadow-indigo-100 hover:-translate-y-0.5 transition-all"
+                                            className="p-3 bg-indigo-600 text-white rounded-xl shadow-lg hover:-translate-y-0.5 transition-all"
                                             title="Join Meeting"
                                         >
                                             <Video size={18} />
                                         </button>
 
-                                        <button onClick={() => setRejectingUser(booking)} className="px-5 py-2.5 rounded-xl border border-rose-200 text-rose-600 font-bold text-xs hover:bg-rose-500 hover:text-white transition-all">
+                                        {/* Show controls only if status is not already decided or allow overrides */}
+                                        <button
+                                            disabled={actionLoading}
+                                            onClick={() => setRejectingUser(booking)}
+                                            className="px-5 py-2.5 rounded-xl border border-rose-200 text-rose-600 font-bold text-xs hover:bg-rose-500 hover:text-white transition-all disabled:opacity-50"
+                                        >
                                             Reject
                                         </button>
 
-                                        <button onClick={() => showNotify('Approved')} className="px-5 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-xs hover:bg-emerald-600 transition-all shadow-lg shadow-slate-200">
-                                            Approve
+                                        <button
+                                            disabled={actionLoading}
+                                            onClick={() => handleApprove(booking._id)}
+                                            className="px-5 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-xs hover:bg-emerald-600 transition-all shadow-lg flex items-center gap-2 disabled:opacity-50"
+                                        >
+                                            {actionLoading ? <Loader2 size={14} className="animate-spin" /> : 'Approve'}
                                         </button>
                                     </div>
                                 </td>
                             </tr>
                         )) : (
                             <tr>
-                                <td colSpan={userRole === 'admin' ? 4 : 3} className="px-8 py-10 text-center text-slate-400 font-medium">
-                                    No bookings found for this criteria.
+                                <td colSpan={4} className="px-8 py-10 text-center text-slate-400 font-medium">
+                                    No bookings found.
                                 </td>
                             </tr>
                         )}
@@ -194,8 +224,8 @@ const Interviews = () => {
 
             {/* Rejection Modal */}
             {rejectingUser && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-200 flex items-center justify-center p-4">
-                    <div className="bg-white w-full max-w-md rounded-4xl p-8 shadow-2xl border border-rose-50 animate-in fade-in zoom-in-95 duration-300">
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
+                    <div className="bg-white w-full max-w-md rounded-4xl p-8 shadow-2xl border border-rose-50">
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-xl font-black text-slate-900">Rejection Reason</h3>
                             <button onClick={() => setRejectingUser(null)}><X size={20} className="text-slate-400" /></button>
@@ -205,12 +235,23 @@ const Interviews = () => {
                             autoFocus
                             value={rejectionComment}
                             onChange={(e) => setRejectionComment(e.target.value)}
-                            placeholder="Detail why this profile was rejected..."
+                            placeholder="Detail why this profile was rejected (Mandatory)..."
                             className="w-full h-40 bg-slate-50 border border-slate-100 rounded-3xl p-5 text-slate-700 font-medium focus:ring-2 focus:ring-rose-100 focus:bg-white transition-all resize-none outline-none"
                         />
                         <div className="grid grid-cols-2 gap-4 mt-6">
-                            <button onClick={() => setRejectingUser(null)} className="py-4 rounded-2xl bg-slate-50 text-slate-500 font-bold text-xs uppercase hover:bg-slate-100 transition-colors">Cancel</button>
-                            <button onClick={handleConfirmReject} className="py-4 rounded-2xl bg-rose-600 text-white font-bold text-xs uppercase shadow-lg shadow-rose-100 hover:bg-rose-700 transition-all">Reject</button>
+                            <button
+                                onClick={() => setRejectingUser(null)}
+                                className="py-4 rounded-2xl bg-slate-50 text-slate-500 font-bold text-xs uppercase hover:bg-slate-100 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                disabled={actionLoading || !rejectionComment.trim()}
+                                onClick={handleConfirmReject}
+                                className="py-4 rounded-2xl bg-rose-600 text-white font-bold text-xs uppercase shadow-lg hover:bg-rose-700 transition-all disabled:bg-slate-300 flex items-center justify-center gap-2"
+                            >
+                                {actionLoading ? <Loader2 size={16} className="animate-spin" /> : 'Confirm Reject'}
+                            </button>
                         </div>
                     </div>
                 </div>

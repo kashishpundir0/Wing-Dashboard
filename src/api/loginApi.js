@@ -45,14 +45,11 @@ export const loginUser = async (credentials) => {
       password: credentials.password
     });
 
-    // Postman shows structure: { "data": { "id": "...", "role": "...", "token": "..." } }
-    if (response.data && response.data.data) {
-      const loginData = response.data.data;
+    // New backend structure: { success, message, data: { id, name, email, role, token } }
+    if (response.data && response.data.success) {
+      const userData = response.data.data; // Access the 'data' object
 
-      const token = loginData.token;
-      const userId = loginData.id; // MATCHING POSTMAN: loginData.id
-      const userRole = loginData.role;
-      const userName = loginData.name || 'User';
+      const { token, role, name, id } = userData;
 
       if (!token) {
         throw new Error("No token received from server.");
@@ -60,25 +57,22 @@ export const loginUser = async (credentials) => {
 
       // Save to LocalStorage
       localStorage.setItem('token', token);
-      localStorage.setItem('userRole', userRole);
-      localStorage.setItem('userName', userName);
-
-      if (userId) {
-        localStorage.setItem('userId', userId); // This fixes the /api/null error
-      }
+      localStorage.setItem('userRole', role); // This will now be 'admin' or 'interviewer'
+      localStorage.setItem('userName', name);
+      localStorage.setItem('userId', id);
 
       return {
         success: true,
-        role: userRole,
-        userName: userName,
+        role: role,
+        userName: name,
         token: token,
-        userId: userId
+        userId: id
       };
     }
 
     throw new Error("Invalid response format from server.");
   } catch (error) {
-    const msg = error.response?.data?.message || "Authentication failed. Check your email/password.";
+    const msg = error.response?.data?.message || error.message || "Authentication failed.";
     throw new Error(msg);
   }
 };

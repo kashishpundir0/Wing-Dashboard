@@ -3,26 +3,34 @@ import apiClient from './apiClient';
 export const interviewApi = {
     /**
      * Fetch bookings based on role.
-     * Admin gets everything, Interviewer gets only theirs.
      */
     getBookings: async () => {
         const role = localStorage.getItem('userRole');
-        const userId = localStorage.getItem('userId'); // Assuming you store the logged-in user's ID
+        const userId = localStorage.getItem('userId');
 
         if (role === 'admin') {
-            // Admin endpoint for all bookings
             const response = await apiClient.get('/api/bookings');
             return response.data;
         } else {
-            // Interviewer specific endpoint
-            // The ID passed here should be the interviewer's specific ID
             const response = await apiClient.get(`/api/user-bookings/${userId}`);
             return response.data;
         }
     },
 
-    // Optional: Add methods for approval/rejection if you have those endpoints
-    updateBookingStatus: async (id, status, comment) => {
-        return await apiClient.patch(`/api/bookings/${id}`, { status, comment });
+    /**
+     * Update Booking Status (Accept/Reject)
+     * @param {string} id - Booking ID
+     * @param {string} status - 'accepted' or 'rejected'
+     * @param {string} rejectionReason - Mandatory if status is 'rejected'
+     */
+    updateBookingStatus: async (id, status, rejectionReason = "") => {
+        const payload = { status };
+        if (status === 'rejected') {
+            payload.rejectionReason = rejectionReason;
+        }
+
+        // Using the endpoint from your screenshot: PUT /api/interview-change-status/:id
+        const response = await apiClient.put(`/api/interview-change-status/${id}`, payload);
+        return response.data;
     }
 };

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, Shield, User } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, User } from 'lucide-react';
 import { loginUser, registerAdmin } from '../api/loginApi';
 import LogoImg from '../assets/logo.png';
 import { toast } from 'react-hot-toast';
@@ -22,12 +22,10 @@ const Login = () => {
 
     try {
       if (isRegistering) {
-        // Calls https://api.wingmann.online/api/register/admin
         await registerAdmin(formData);
         toast.success("Admin registered! Now please sign in.");
         setIsRegistering(false);
       } else {
-        // Calls https://api.wingmann.online/api/login
         const response = await loginUser({
           email: formData.email,
           password: formData.password
@@ -35,11 +33,13 @@ const Login = () => {
 
         toast.success(`Welcome back, ${response.userName}`);
 
-        // Redirect based on role returned by backend
+        // This role logic now works because backend provides the correct role
         if (response.role === 'interviewer') {
           navigate('/interviewer-overview');
-        } else {
+        } else if (response.role === 'admin') {
           navigate('/overview');
+        } else {
+          toast.error("Unknown user role assigned.");
         }
       }
     } catch (err) {
@@ -52,7 +52,6 @@ const Login = () => {
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-slate-50 p-6">
       <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl p-10 border border-slate-100 relative overflow-hidden">
-
         <div className="flex flex-col items-center mb-8 relative z-10">
           <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center p-2.5 mb-6">
             <img src={LogoImg} alt="Logo" className="w-full h-full object-contain invert" />
