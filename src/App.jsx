@@ -15,6 +15,7 @@ import Feedback from './pages/Feedback';
 import Availability from './pages/Availability';
 import InterviewerOverview from './pages/InterviewerOverview';
 import Users from './pages/UsersPage';
+import FacialAttractiveness from './pages/FacialAttractiveness';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const userRole = localStorage.getItem('userRole');
@@ -78,6 +79,11 @@ const AppContent = () => {
             <Route path="/interviews" element={<ProtectedRoute allowedRoles={['admin', 'interviewer']}><Interviews /></ProtectedRoute>} />
 
             <Route path="*" element={<Navigate to={userRole === 'interviewer' ? "/interviewer-overview" : "/overview"} />} />
+            <Route path="/facial-attractiveness" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <FacialAttractiveness />
+              </ProtectedRoute>
+            } />
           </Routes>
         </main>
       </div>

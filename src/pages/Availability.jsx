@@ -105,7 +105,6 @@ const Availability = () => {
       </div>
     );
   }
-
   return (
     <div className="w-full pt-10 px-4 md:px-10 pb-20 animate-in fade-in duration-500">
 

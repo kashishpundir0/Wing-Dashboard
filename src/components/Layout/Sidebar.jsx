@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { Camera } from 'lucide-react';
 import {
   LayoutDashboard, Calendar, Clock, Utensils, LogOut,
   BarChart3, Users, MessageSquare, ChevronRight, UserCheck
@@ -30,6 +31,13 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
     // Shared
     { id: 'interviews', label: 'Interviews', icon: Calendar, path: '/interviews', roles: ['admin', 'interviewer'] },
+    {
+      id: 'facial-attractiveness',
+      label: 'Facial Attractiveness',
+      icon: Camera, // Make sure to import Camera from 'lucide-react'
+      path: '/facial-attractiveness',
+      roles: ['admin']
+    },
   ];
 
   const filteredMenuItems = menuItems.filter(item => item?.roles?.includes(userRole));
