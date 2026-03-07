@@ -1,53 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, AreaChart, Area, LabelList
 } from 'recharts';
-import { ArrowUpRight, Users, Calendar, MousePointer2, ClipboardCheck, CheckCircle, XCircle, Filter } from 'lucide-react';
+import {
+  ArrowUpRight, Users, Calendar, MousePointer2,
+  ClipboardCheck, CheckCircle, XCircle, Filter
+} from 'lucide-react';
 
 // Import the API handler
-import { getVisitSummary } from '../api/overviewApi';
+import { getDashboardOverview } from '../api/overviewApi';
+
+const THEME_DARK = "#1F1F2E";
 
 const Overview = () => {
-  const THEME_DARK = "#1F1F2E";
-  const THEME_BG = "#F5F6FA";
-
-  // 1. State for API data and Loading
-  const [totalVisitors, setTotalVisitors] = useState(0);
+  // 1. State Management
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 2. Date Range States (Default: Last 7 days)
-  const [startDate, setStartDate] = useState(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
-  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
+  // Default: Last 14 days
+  const [startDate, setStartDate] = useState(
+    new Date(Date.now() - 13 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+  );
+  const [endDate, setEndDate] = useState(
+    new Date().toISOString().split('T')[0]
+  );
 
-  // 3. Traffic Graph Data (Time-based peak visitors)
-  const trafficTrendData = [
-    { time: 'Mon', visits: 2400 },
-    { time: 'Tue', visits: 1398 },
-    { time: 'Wed', visits: 9800 },
-    { time: 'Thu', visits: 3908 },
-    { time: 'Fri', visits: 4800 },
-    { time: 'Sat', visits: 3800 },
-    { time: 'Sun', visits: 4300 },
-  ];
-
-  const pipelineData = [
-    { stage: 'Scheduled', count: 450 },
-    { stage: 'Completed', count: 380 },
-    { stage: 'Accepted', count: 120 },
-    { stage: 'Rejected', count: 260 },
-  ];
-
-  // Fetch data whenever dates change
+  // 2. Fetch Data
   useEffect(() => {
     const fetchStats = async () => {
       setLoading(true);
       try {
-        // Assuming getVisitSummary handles (startDate, endDate) params
-        const data = await getVisitSummary(startDate, endDate);
-        if (data.success) {
-          setTotalVisitors(data.totalUniqueVisitors);
-        }
+        const result = await getDashboardOverview(startDate, endDate);
+        setData(result);
       } catch (error) {
         console.error("Failed to load statistics");
       } finally {
@@ -57,22 +42,48 @@ const Overview = () => {
     fetchStats();
   }, [startDate, endDate]);
 
-  const acquisitionData = [
-    { name: 'Visits', value: totalVisitors, color: THEME_DARK },
-    { name: 'Signups', value: 3200, color: '#4F46E5' },
-    { name: 'Interviews', value: 450, color: '#94A3B8' },
-    { name: 'Dates', value: 2050, color: '#CBD5E1' },
-  ];
+  // 3. Helper: Fill missing dates so the graph is continuous
+  const trafficTrendData = useMemo(() => {
+    if (!data) return [];
 
-  const outcomeData = [
-    { name: 'Accepted', value: 120, fill: THEME_DARK },
-    { name: 'Rejected', value: 260, fill: '#E2E8F0' },
-  ];
+    const dayList = [];
+    let current = new Date(startDate);
+    const stop = new Date(endDate);
 
+    // Map existing API data for quick lookup
+    const apiDataMap = {};
+    data.traffic.weekly.forEach(item => {
+      apiDataMap[item.date] = item.visits;
+    });
+
+    // Loop through every day in range
+    while (current <= stop) {
+      const dateStr = current.toISOString().split('T')[0];
+      dayList.push({
+        displayDate: current.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        visits: apiDataMap[dateStr] || 0, // Fallback to 0 if no data for this day
+      });
+      current.setDate(current.getDate() + 1);
+    }
+    return dayList;
+  }, [data, startDate, endDate]);
+
+  // 4. Data for other charts
+  const acquisitionData = useMemo(() => [
+    { name: 'Visits', value: data?.traffic?.today || 0, color: THEME_DARK },
+    { name: 'Signups', value: data?.dashboard?.users?.total || 0, color: '#4F46E5' },
+    { name: 'Interviews', value: data?.dashboard?.interviews?.total || 0, color: '#94A3B8' },
+    { name: 'Dates', value: data?.dashboard?.datesPlanned?.total || 0, color: '#CBD5E1' },
+  ], [data]);
+
+  const outcomeData = useMemo(() => [
+    { name: 'Accepted', value: data?.bookings?.accepted || 0, fill: THEME_DARK },
+    { name: 'Rejected', value: data?.bookings?.rejected || 0, fill: '#E2E8F0' },
+  ], [data]);
+
+  // Sub-component for KPI Cards
   const StatCard = ({ title, value, icon: Icon, trend, subtext, isHero }) => (
-    <div className={`p-8 rounded-[2.5rem] transition-all flex flex-col justify-between h-56 ${isHero
-      ? 'bg-[#1F1F2E] text-white shadow-2xl shadow-[#1F1F2E]/30'
-      : 'bg-white text-[#1F1F2E] border border-slate-100 shadow-sm'
+    <div className={`p-8 rounded-[2.5rem] transition-all flex flex-col justify-between h-56 ${isHero ? 'bg-[#1F1F2E] text-white shadow-2xl shadow-[#1F1F2E]/30' : 'bg-white text-[#1F1F2E] border border-slate-100 shadow-sm'
       }`}>
       <div className="flex justify-between items-start">
         <div className={`p-3 rounded-2xl ${isHero ? 'bg-white/10' : 'bg-[#F5F6FA]'}`}>
@@ -84,11 +95,11 @@ const Overview = () => {
         </span>
       </div>
       <div>
-        <h3 className={`text-[11px] font-bold uppercase tracking-[0.2em] mb-1 opacity-60`}>{title}</h3>
+        <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] mb-1 opacity-60">{title}</h3>
         <p className="text-4xl font-black tracking-tight">
-          {loading ? "..." : value.toLocaleString()}
+          {loading ? "..." : value?.toLocaleString()}
         </p>
-        <p className={`text-[10px] mt-2 font-bold uppercase tracking-widest opacity-40`}>{subtext}</p>
+        <p className="text-[10px] mt-2 font-bold uppercase tracking-widest opacity-40">{subtext}</p>
       </div>
     </div>
   );
@@ -99,53 +110,45 @@ const Overview = () => {
       {/* HEADER & DATE RANGE FILTER */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-6 bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
         <div>
-          <h2 className="text-2xl font-black text-[#1F1F2E] tracking-tight">Analytics Dashboard</h2>
-          <p className="text-sm text-slate-400 font-medium">Monitoring traffic between selected dates</p>
+          <h2 className="text-2xl font-black text-[#1F1F2E] tracking-tight">Analytics Overview</h2>
+          <p className="text-sm text-slate-400 font-medium">Performance metrics for the selected duration</p>
         </div>
 
         <div className="flex items-center gap-4 bg-[#F5F6FA] p-3 rounded-2xl border border-slate-200">
           <div className="flex items-center gap-2 px-3 border-r border-slate-300">
             <Filter size={16} className="text-slate-400" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Range</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Filter</span>
           </div>
           <div className="flex items-center gap-3">
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="bg-transparent text-xs font-bold text-[#1F1F2E] outline-none"
+              className="bg-transparent text-xs font-bold text-[#1F1F2E] outline-none cursor-pointer"
             />
             <span className="text-slate-300 font-bold">to</span>
             <input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="bg-transparent text-xs font-bold text-[#1F1F2E] outline-none"
+              className="bg-transparent text-xs font-bold text-[#1F1F2E] outline-none cursor-pointer"
             />
           </div>
         </div>
       </div>
 
-      {/* 1. KPI Grid */}
+      {/* KPI GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        <StatCard title="Total Traffic" value={totalVisitors} icon={MousePointer2} trend="14%" subtext="Dynamic Range Visits" isHero={true} />
-        <StatCard title="New Signups" value={3200} icon={Users} trend="8%" subtext="User growth" />
-        <StatCard title="Scheduled Interviews" value={450} icon={ClipboardCheck} trend="12%" subtext="Pending sessions" />
-        <StatCard title="Dates Planned" value={2050} icon={Calendar} trend="18%" subtext="Matchmaking success" />
+        <StatCard title="Total Traffic" value={data?.traffic?.today} icon={MousePointer2} trend="Live" subtext="Today's Active Visits" isHero={true} />
+        <StatCard title="New Signups" value={data?.dashboard?.users?.total} icon={Users} trend={data?.dashboard?.users?.growth} subtext="User acquisition" />
+        <StatCard title="Scheduled" value={data?.dashboard?.interviews?.total} icon={ClipboardCheck} trend={data?.dashboard?.interviews?.growth} subtext="Interviews in range" />
+        <StatCard title="Dates Planned" value={data?.dashboard?.datesPlanned?.total} icon={Calendar} trend={data?.dashboard?.datesPlanned?.growth} subtext="Successful matches" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-
-
-        {/* 3. User Acquisition Funnel */}
+        {/* ACQUISITION FUNNEL */}
         <div className="lg:col-span-2 bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100">
-          <div className="flex justify-between items-center mb-10">
-            <div>
-              <h3 className="text-xl font-bold text-[#1F1F2E] tracking-tight">Acquisition Funnel</h3>
-              <p className="text-sm text-slate-400 font-medium mt-1">Stage-by-stage progression</p>
-            </div>
-          </div>
+          <h3 className="text-xl font-bold text-[#1F1F2E] tracking-tight mb-10">Acquisition Funnel</h3>
           <div className="h-80 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={acquisitionData} margin={{ top: 20 }}>
@@ -162,12 +165,11 @@ const Overview = () => {
           </div>
         </div>
 
-
-        {/* 4. Interview Success Ring */}
+        {/* BOOKING SUCCESS PIE */}
         <div className="bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100 flex flex-col justify-between">
           <div>
-            <h3 className="text-xl font-bold text-[#1F1F2E] tracking-tight">Interview Success</h3>
-            <p className="text-sm text-slate-400 font-medium mt-1">Acceptance Ratio</p>
+            <h3 className="text-xl font-bold text-[#1F1F2E] tracking-tight">Booking Ratio</h3>
+            <p className="text-sm text-slate-400 font-medium mt-1">Acceptance Performance</p>
           </div>
           <div className="h-60 w-full relative flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
@@ -178,35 +180,31 @@ const Overview = () => {
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center pt-12">
-              <span className="text-4xl font-black text-[#1F1F2E]">31.5%</span>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Rate</span>
+              <span className="text-4xl font-black text-[#1F1F2E]">{data?.bookings?.acceptedPercentage || "0%"}</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Accepted</span>
             </div>
           </div>
           <div className="space-y-3">
             <div className="flex justify-between items-center p-4 bg-[#F5F6FA] rounded-2xl">
-              <span className="flex items-center gap-3 text-xs font-bold text-slate-500">
-                <CheckCircle size={16} className="text-[#1F1F2E]" /> Accepted
-              </span>
-              <span className="text-sm font-bold text-[#1F1F2E]">120</span>
+              <span className="flex items-center gap-3 text-xs font-bold text-slate-500"><CheckCircle size={16} className="text-[#1F1F2E]" /> Accepted</span>
+              <span className="text-sm font-bold text-[#1F1F2E]">{data?.bookings?.accepted || 0}</span>
             </div>
             <div className="flex justify-between items-center p-4 bg-[#F5F6FA] rounded-2xl opacity-50">
-              <span className="flex items-center gap-3 text-xs font-bold text-slate-500">
-                <XCircle size={16} className="text-slate-400" /> Rejected
-              </span>
-              <span className="text-sm font-bold text-slate-400">260</span>
+              <span className="flex items-center gap-3 text-xs font-bold text-slate-500"><XCircle size={16} className="text-slate-400" /> Rejected</span>
+              <span className="text-sm font-bold text-slate-400">{data?.bookings?.rejected || 0}</span>
             </div>
           </div>
         </div>
-        {/* 2. TRAFFIC TREND GRAPH (Replaces Pipeline) */}
+
+        {/* VISITOR INTENSITY - THE FULL TIMELINE */}
         <div className="lg:col-span-3 bg-[#1F1F2E] p-10 rounded-[3rem] shadow-2xl text-white">
           <div className="flex justify-between items-center mb-10">
             <div>
               <h3 className="text-xl font-bold tracking-tight">Visitor Intensity</h3>
-              <p className="text-sm text-white/40 font-medium mt-1">Peak traffic distribution over time</p>
+              <p className="text-sm text-white/40 font-medium mt-1">Traffic flow from {startDate} to {endDate}</p>
             </div>
             <div className="bg-white/10 px-4 py-2 rounded-xl border border-white/10">
-              <span className="text-[10px] font-bold uppercase tracking-widest opacity-60">Status: </span>
-              <span className="text-xs font-bold text-emerald-400">Live Updates</span>
+              <span className="text-xs font-bold text-emerald-400">Live Sync</span>
             </div>
           </div>
           <div className="h-72 w-full">
@@ -214,44 +212,33 @@ const Overview = () => {
               <AreaChart data={trafficTrendData}>
                 <defs>
                   <linearGradient id="colorTraffic" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.3} />
+                    <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.4} />
                     <stop offset="95%" stopColor="#4F46E5" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'rgba(255,255,255,0.4)', fontWeight: 700 }} dy={10} />
-                <YAxis hide />
+                <XAxis
+                  dataKey="displayDate"
+                  axisLine={false}
+                  tickLine={false}
+                  minTickGap={30}
+                  tick={{ fontSize: 11, fill: 'rgba(255,255,255,0.4)', fontWeight: 700 }}
+                  dy={10}
+                />
+                <YAxis hide domain={[0, 'auto']} />
                 <Tooltip
                   contentStyle={{ backgroundColor: '#1F1F2E', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '15px' }}
                   itemStyle={{ color: '#fff', fontWeight: 'bold' }}
                 />
-                <Area type="monotone" dataKey="visits" stroke="#4F46E5" strokeWidth={4} fillOpacity={1} fill="url(#colorTraffic)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="lg:col-span-3 bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100">
-          <div className="flex justify-between items-center mb-8">
-            <div>
-              <h3 className="text-xl font-bold text-[#1F1F2E] tracking-tight">Pipeline Volume</h3>
-              <p className="text-sm text-slate-400 font-medium mt-1">Workflow progression analytics</p>
-            </div>
-          </div>
-          <div className="h-75">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={pipelineData}>
-                <defs>
-                  <linearGradient id="colorDark" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={THEME_DARK} stopOpacity={0.1} />
-                    <stop offset="95%" stopColor={THEME_DARK} stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="stage" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: '700', fill: '#94a3b8' }} dy={10} />
-                <YAxis hide />
-                <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
-                <Area type="monotone" dataKey="count" stroke={THEME_DARK} strokeWidth={4} fillOpacity={1} fill="url(#colorDark)" />
+                <Area
+                  type="monotone"
+                  dataKey="visits"
+                  stroke="#4F46E5"
+                  strokeWidth={4}
+                  fillOpacity={1}
+                  fill="url(#colorTraffic)"
+                  animationDuration={1200}
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>

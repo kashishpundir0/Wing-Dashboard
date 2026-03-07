@@ -148,7 +148,7 @@ const Restaurants = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {restaurantList.map((rest) => (
-            <div key={rest._id} className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden relative group hover:shadow-xl transition-all duration-500">
+            <div key={rest._id} className="bg-white rounded-4xl border border-slate-100 shadow-sm overflow-hidden relative group hover:shadow-xl transition-all duration-500">
               <div className="absolute top-4 right-4 z-20 flex gap-2">
                 <button onClick={() => handleEditOpen(rest)} className="p-2.5 bg-white/90 backdrop-blur text-black rounded-xl border border-slate-100 hover:bg-black hover:text-white transition-all"><Edit3 size={16} /></button>
                 <button onClick={() => handleDelete(rest._id)} className="p-2.5 bg-white/90 backdrop-blur text-red-600 rounded-xl border border-slate-100 hover:bg-red-600 hover:text-white transition-all"><Trash2 size={16} /></button>
@@ -206,7 +206,7 @@ const Restaurants = () => {
 
       {/* Modal Section remains exactly the same as your provided code */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
           <div className="bg-white w-full max-w-xl rounded-[2.5rem] shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
             <div className="p-8 flex justify-between items-center border-b border-slate-50">
               <h3 className="text-slate-900 text-xl font-black uppercase tracking-widest">{editId ? 'Update Venue' : 'New Venue'}</h3>
@@ -229,12 +229,10 @@ const Restaurants = () => {
                   </button>
                 ))}
               </div>
-
               <div onClick={() => fileInputRef.current.click()} className="h-44 w-full rounded-3xl border-2 border-dashed border-slate-100 bg-slate-50/50 flex items-center justify-center cursor-pointer overflow-hidden relative group">
                 {preview ? <img src={preview} className="w-full h-full object-cover" /> : <div className="text-center"><Camera className="mx-auto text-slate-300 mb-2" size={32} /><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Upload Venue Photo</p></div>}
                 <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageChange} />
               </div>
-
               <div className="grid grid-cols-1 gap-4">
                 <Input label="BUSINESS NAME *" value={formData.businessName} onChange={(e) => handleChange('businessName', e.target.value)} />
                 <Input label="STREET ADDRESS" value={formData.streetAddress} onChange={(e) => handleChange('streetAddress', e.target.value)} />
@@ -259,7 +257,7 @@ const Restaurants = () => {
 
               <div className="flex gap-4 pt-6">
                 <Button onClick={() => setIsModalOpen(false)} variant="outline" className="flex-1 rounded-2xl border-slate-100 text-slate-400">Cancel</Button>
-                <Button onClick={handleSave} disabled={saving} className="flex-[2] bg-black text-white font-black uppercase tracking-widest rounded-2xl shadow-xl">
+                <Button onClick={handleSave} disabled={saving} className="flex-2 bg-black text-white font-black uppercase tracking-widest rounded-2xl shadow-xl">
                   {saving ? <Loader2 size={18} className="animate-spin" /> : (editId ? 'Save Changes' : 'Confirm Partner')}
                 </Button>
               </div>

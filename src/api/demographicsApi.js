@@ -1,12 +1,12 @@
+// src/api/demographicsApi.js
 import apiClient from './apiClient';
 
-export const getDemographics = async () => {
+export const getUserAnalytics = async () => {
   try {
-    const response = await apiClient.get('/api/v1/demographics');
-    // If successful, returns the data object
+    const response = await apiClient.get('/api/user-analytics');
     return response.data;
   } catch (error) {
-    const errorMessage = error.response?.data?.message || "Failed to fetch demographics";
-    throw new Error(errorMessage);
+    console.error("Error fetching demographic analytics:", error);
+    throw error;
   }
 };

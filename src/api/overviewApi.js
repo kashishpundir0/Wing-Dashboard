@@ -1,17 +1,18 @@
-// src/api/overviewApi.js
 import apiClient from './apiClient';
 
 /**
- * Fetches the summary of visits including total unique visitors
- * Endpoint: /api/visits/summary
+ * Fetches dashboard data based on date range
+ * @param {string} startDate - YYYY-MM-DD
+ * @param {string} endDate - YYYY-MM-DD
  */
-export const getVisitSummary = async () => {
+export const getDashboardOverview = async (startDate, endDate) => {
     try {
-        const response = await apiClient.get('/api/visits/summary');
-        // We return the data directly so the component can use it
+        const response = await apiClient.get('/api/dashbaord-overview', {
+            params: { startDate, endDate },
+        });
         return response.data;
     } catch (error) {
-        console.error("API Error in getVisitSummary:", error);
-        throw error; // Re-throw so the component can handle it if needed
+        console.error("Error fetching dashboard data:", error);
+        throw error;
     }
 };

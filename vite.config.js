@@ -6,13 +6,10 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     proxy: {
-      // When you call /api/login locally:
       '/api': {
-        target: 'https://api.wingmann.online', // It sends it to the API domain
+        target: 'https://api.wingmann.online',
         changeOrigin: true,
         secure: false,
-        // No rewrite needed here because the backend 
-        // already expects the "/api" prefix.
       },
     },
   },
